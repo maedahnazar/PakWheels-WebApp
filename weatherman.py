@@ -1,6 +1,7 @@
 import os
 import csv
 import sys
+import argparse
 from datetime import datetime
 
 class WeatherReading:
@@ -135,7 +136,6 @@ def generate_monthly_chart(weather_data, year, month):
 #                 print(f"{reading.date.day:02d} {'+' * reading.max_temp} {'+' * reading.min_temp} {reading.min_temp} - {reading.max_temp}C")
 
 def main():
-    import argparse
     parser = argparse.ArgumentParser(description='Weather Man')
     parser.add_argument('directory', type=str, help='Directory containing weather files')
     parser.add_argument('-e', '--year', type=int, help='Generate yearly report for given year')
