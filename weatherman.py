@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import argparse
 import csv
 import os
@@ -27,6 +28,45 @@ class WeatherReading:
         self.mean_humidity = parse_int(mean_humidity)
         self.min_humidity = parse_int(min_humidity)
 
+=======
+import os
+import csv
+import sys
+import argparse
+from datetime import datetime
+
+class WeatherReading:
+    def __init__(self, date, max_temp, mean_temp, min_temp, dew_point, mean_dew_point, min_dew_point, max_humidity, mean_humidity, min_humidity, max_pressure, mean_pressure, min_pressure, max_visibility, mean_visibility, min_visibility, max_wind_speed, mean_wind_speed, max_gust_speed, precipitation, cloud_cover, events, wind_dir_degrees):
+        self.date = datetime.strptime(date, "%Y-%m-%d")
+        self.max_temp = self.parse_int(max_temp)
+        self.mean_temp = self.parse_int(mean_temp)
+        self.min_temp = self.parse_int(min_temp)
+        self.dew_point = self.parse_int(dew_point)
+        self.mean_dew_point = self.parse_int(mean_dew_point)
+        self.min_dew_point = self.parse_int(min_dew_point)
+        self.max_humidity = self.parse_int(max_humidity)
+        self.mean_humidity = self.parse_int(mean_humidity)
+        self.min_humidity = self.parse_int(min_humidity)
+        self.max_pressure = self.parse_float(max_pressure)
+        self.mean_pressure = self.parse_float(mean_pressure)
+        self.min_pressure = self.parse_float(min_pressure)
+        self.max_visibility = self.parse_float(max_visibility)
+        self.mean_visibility = self.parse_float(mean_visibility)
+        self.min_visibility = self.parse_float(min_visibility)
+        self.max_wind_speed = self.parse_int(max_wind_speed)
+        self.mean_wind_speed = self.parse_int(mean_wind_speed)
+        self.max_gust_speed = self.parse_int(max_gust_speed)
+        self.precipitation = self.parse_float(precipitation)
+        self.cloud_cover = self.parse_int(cloud_cover)
+        self.events = events
+        self.wind_dir_degrees = self.parse_int(wind_dir_degrees)
+    
+    def parse_int(self, value):
+        return int(value) if value else None
+
+    def parse_float(self, value):
+        return float(value) if value else None
+>>>>>>> origin/Weather_Man
 
 class WeatherData:
     def __init__(self):
@@ -35,6 +75,7 @@ class WeatherData:
     def add_reading(self, reading):
         self.readings.append(reading)
 
+<<<<<<< HEAD
 
 def parse_files(directory):
     weather_data = WeatherData()
@@ -59,15 +100,35 @@ def parse_files(directory):
                             mean_humidity=row["Mean Humidity"],
                             min_humidity=row["Min Humidity"]
                         )
+=======
+def parse_files(directory):
+    weather_data = WeatherData()
+    for filename in os.listdir(directory):
+        if filename.endswith(".txt"):
+            with open(os.path.join(directory, filename)) as file:
+                reader = csv.reader(file)
+                next(reader)  # skip header
+                for row in reader:
+                    if row[0]:
+                        reading = WeatherReading(*row[:23])  # there are 23 columns to be read
+>>>>>>> origin/Weather_Man
                         weather_data.add_reading(reading)
     return weather_data
 
 def compute_yearly_statistics(weather_data, year):
+<<<<<<< HEAD
     highest_temp = float("-inf")
     lowest_temp = float("inf")
     highest_temp_day = None
     lowest_temp_day = None
     highest_humidity = float("-inf")
+=======
+    highest_temp = float('-inf')
+    lowest_temp = float('inf')
+    highest_temp_day = None
+    lowest_temp_day = None
+    highest_humidity = float('-inf')
+>>>>>>> origin/Weather_Man
     highest_humidity_day = None
 
     for reading in weather_data.readings:
@@ -86,9 +147,15 @@ def compute_yearly_statistics(weather_data, year):
 
 def generate_yearly_report(weather_data, year):
     highest_temp, highest_temp_day, lowest_temp, lowest_temp_day, highest_humidity, highest_humidity_day = compute_yearly_statistics(weather_data, year)
+<<<<<<< HEAD
     print(f"Highest: {highest_temp}C on {highest_temp_day.strftime("%B %d")}")
     print(f"Lowest: {lowest_temp}C on {lowest_temp_day.strftime("%B %d")}")
     print(f"Humidity: {highest_humidity}% on {highest_humidity_day.strftime("%B %d")}")
+=======
+    print(f"Highest: {highest_temp}C on {highest_temp_day.strftime('%B %d')}")
+    print(f"Lowest: {lowest_temp}C on {lowest_temp_day.strftime('%B %d')}")
+    print(f"Humidity: {highest_humidity}% on {highest_humidity_day.strftime('%B %d')}")
+>>>>>>> origin/Weather_Man
 
 def compute_monthly_averages(weather_data, year, month):
     total_max_temp = 0
@@ -121,6 +188,7 @@ def generate_monthly_average_report(weather_data, year, month):
         print(f"Average Mean Humidity: {avg_mean_humidity}%")
 
 def generate_monthly_chart(weather_data, year, month):
+<<<<<<< HEAD
     print(f"{datetime(year, month, 1).strftime("%B %Y")}")
     for reading in weather_data.readings:
         if reading.date.year == year and reading.date.month == month:
@@ -141,6 +209,34 @@ def main():
     parser.add_argument("-e", "--year", type=int, help="Generate yearly report for given year")
     parser.add_argument("-a", "--average", type=str, help="Generate monthly average report for given year/month (YYYY/MM)")
     parser.add_argument("-c", "--chart", type=str, help="Generate monthly chart for given year/month (YYYY/MM)")
+=======
+    print(f"{datetime(year, month, 1).strftime('%B %Y')}")
+    for reading in weather_data.readings:
+        if reading.date.year == year and reading.date.month == month:
+            if reading.max_temp is not None and reading.min_temp is not None:
+                print(f"{reading.date.day:02d} {'+' * reading.max_temp} {reading.max_temp}C")
+                print(f"{reading.date.day:02d} {'+' * reading.min_temp} {reading.min_temp}C")
+    for reading in weather_data.readings:
+        if reading.date.year == year and reading.date.month == month:
+            if reading.max_temp is not None and reading.min_temp is not None:
+                print(f"{reading.date.day:02d} {'+' * reading.max_temp}{'+' * reading.min_temp} {reading.min_temp}C - {reading.max_temp}C")
+
+                
+
+# def generate_combined_monthly_chart(weather_data, year, month):
+#     print(f"{datetime(year, month, 1).strftime('%B %Y')}")
+#     for reading in weather_data.readings:
+#         if reading.date.year == year and reading.date.month == month:
+#             if reading.max_temp is not None and reading.min_temp is not None:
+#                 print(f"{reading.date.day:02d} {'+' * reading.max_temp} {'+' * reading.min_temp} {reading.min_temp} - {reading.max_temp}C")
+
+def main():
+    parser = argparse.ArgumentParser(description='Weather Man')
+    parser.add_argument('directory', type=str, help='Directory containing weather files')
+    parser.add_argument('-e', '--year', type=int, help='Generate yearly report for given year')
+    parser.add_argument('-a', '--average', type=str, help='Generate monthly average report for given year/month (YYYY/MM)')
+    parser.add_argument('-c', '--chart', type=str, help='Generate monthly chart for given year/month (YYYY/MM)')
+>>>>>>> origin/Weather_Man
     args = parser.parse_args()
 
     weather_data = parse_files(args.directory)
@@ -149,6 +245,7 @@ def main():
         generate_yearly_report(weather_data, args.year)
     
     if args.average:
+<<<<<<< HEAD
         year, month = map(int, args.average.split("/"))
         generate_monthly_average_report(weather_data, year, month)
     
@@ -157,4 +254,14 @@ def main():
         generate_monthly_chart(weather_data, year, month)
 
 if __name__ == "__main__":
+=======
+        year, month = map(int, args.average.split('/'))
+        generate_monthly_average_report(weather_data, year, month)
+    
+    if args.chart:
+        year, month = map(int, args.chart.split('/'))
+        generate_monthly_chart(weather_data, year, month)
+
+if __name__ == '__main__':
+>>>>>>> origin/Weather_Man
     main()
