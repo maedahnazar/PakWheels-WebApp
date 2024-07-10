@@ -31,7 +31,6 @@ class WeatherReportPrinter:
                     print(f"{reading.date.day:02d} {'+' * reading.max_temperature} {reading.max_temperature}C")
                     print(f"{reading.date.day:02d} {'+' * reading.min_temperature} {reading.min_temperature}C")
 
-
 def compute_yearly_statistics(weather_data, year):
     highest_temperature = float("-inf")
     lowest_temperature = float("inf")
@@ -59,7 +58,6 @@ def generate_yearly_report(weather_data, year):
     stats = compute_yearly_statistics(weather_data, year)
     WeatherReportPrinter.print_yearly_report(*stats)
 
-
 def compute_monthly_averages(weather_data, year, month):
     filtered_readings = filter_readings_by_month(weather_data.readings, year, month)
     total_max_temperature, total_min_temperature, total_mean_humidity, count = calculate_totals_and_count(filtered_readings)
@@ -68,7 +66,6 @@ def compute_monthly_averages(weather_data, year, month):
 def generate_monthly_average_report(weather_data, year, month):
     averages = compute_monthly_averages(weather_data, year, month)
     WeatherReportPrinter.print_monthly_average_report(*averages)
-
 
 def generate_monthly_chart(weather_data, year, month):
     WeatherReportPrinter.print_monthly_chart(weather_data, year, month)

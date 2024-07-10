@@ -33,7 +33,6 @@ class WeatherData:
     def add_reading(self, reading):
         self.readings.append(reading)
 
-
 def filter_readings_by_month(readings, year, month):
     return [
         reading for reading in readings if reading.date.year == year and reading.date.month == month
@@ -46,11 +45,11 @@ def calculate_totals_and_count(filtered_readings):
     count = 0
 
     for reading in filtered_readings:
-        if reading.max_temperature is not None:
+        if reading.max_temperature:
             total_max_temperature += reading.max_temperature
-        if reading.min_temperature is not None:
+        if reading.min_temperature:
             total_min_temperature += reading.min_temperature
-        if reading.mean_humidity is not None:
+        if reading.mean_humidity :
             total_mean_humidity += reading.mean_humidity
         count += 1
 
@@ -65,7 +64,6 @@ def compute_averages(total_max_temperature, total_min_temperature, total_mean_hu
     avg_mean_humidity = total_mean_humidity // count
 
     return avg_max_temperature, avg_min_temperature, avg_mean_humidity
-
 
 def parse_weather_file(file_path):
     weather_data = WeatherData()
