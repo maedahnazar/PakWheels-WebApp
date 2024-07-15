@@ -32,65 +32,58 @@ class WeatherRecords:
     def __init__(self):
         self.readings = []
 
-    def add_reading(self, reading):
+    def add_weather_reading(self, reading):
         self.readings.append(reading)
 
 def filter_readings_by_month(readings, year, month):
     return [
-        reading 
-        for reading in readings 
+        reading for reading in readings 
         if reading.date.year == year and reading.date.month == month
     ]   
 
-def aggregate_weather_data(filtered_readings):
+def aggregate_weather_data(filtered_weather_readings):
     total_max_temperature = 0
     total_min_temperature = 0
     total_mean_humidity = 0
-    count = 0
+    reading_count = 0
 
-    for reading in filtered_readings:
+    for reading in filtered_weather_readings:
         if reading.max_temperature:
             total_max_temperature += reading.max_temperature
         if reading.min_temperature:
             total_min_temperature += reading.min_temperature
         if reading.mean_humidity :
             total_mean_humidity += reading.mean_humidity
-        count += 1
+        reading_count += 1
 
     return (
         total_max_temperature, 
         total_min_temperature, 
         total_mean_humidity, 
-        count
+        reading_count
     )
 
-def compute_averages(
+def compute_weather_averages(
     total_max_temperature, 
     total_min_temperature, 
     total_mean_humidity, 
-    count
+    reading_count
 ):
-    if count == 0:
+    if reading_count == 0:
         avg_max_temperature, avg_min_temperature, avg_mean_humidity = None, None, None
 
-    avg_max_temperature = total_max_temperature // count
-    avg_min_temperature = total_min_temperature // count
-    avg_mean_humidity = total_mean_humidity // count
+    avg_max_temperature = total_max_temperature // reading_count
+    avg_min_temperature = total_min_temperature // reading_count
+    avg_mean_humidity = total_mean_humidity // reading_count
 
     return avg_max_temperature, avg_min_temperature, avg_mean_humidity
 
-def parse_weather_file(file_path):
+def parse_weather_file(file_path, date_field):
     weather_records = WeatherRecords()
     with open(file_path, "r") as file:
         reader = csv.DictReader(file)
         for row in reader:
-            if "PKT" in row:
-                date = row["PKT"]
-            elif "PKST" in row:
-                date = row["PKST"]
-            else:
-                date = None
-                
+            date = row.get(date_field)
             if not date:
                 continue
             reading = WeatherReading(
@@ -104,27 +97,29 @@ def parse_weather_file(file_path):
                 min_humidity=row.get("Min Humidity", "").strip() or 
                             row.get("  Min Humidity", "").strip()
             )
-            weather_records.add_reading(reading)
+            weather_records.add_weather_reading(reading)
     return weather_records
 
-def is_weather_file(file_path, expected_columns):
+def find_date_field(file_path):
+    date_field = None
     try:
         with open(file_path, "r") as file:
             reader = csv.DictReader(file)
-            fieldnames = {field.strip() for field in reader.fieldnames}
-
-            if not expected_columns.intersection(fieldnames):
-                return False
-            return True
-    except Exception as e:
-        return False
+            header_row = next(reader)
+            for field in header_row:
+                datetime.strptime(header_row[field], "%Y-%m-%d")
+                date_field = field
+                break  
+    finally:
+        return date_field 
 
 def parse_files(directory):
     weather_records = WeatherRecords()
-    expected_columns = {"PKT", "PKST"}
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
-        if is_weather_file(file_path, expected_columns):
-            file_weather_records = parse_weather_file(file_path)
-            weather_records.readings.extend(file_weather_records.readings)
+        date_field = find_date_field(file_path)
+        if not date_field:
+            continue
+        file_weather_records = parse_weather_file(file_path, date_field)
+        weather_records.readings.extend(file_weather_records.readings)
     return weather_records if weather_records.readings else None
