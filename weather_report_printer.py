@@ -23,11 +23,8 @@ class WeatherReportPrinter:
         print(f"Lowest Average: {avg_min_temperature}C")
         print(f"Average Mean Humidity: {avg_mean_humidity}%")
 
-    def print_monthly_chart(weather_readings, year, month):
+    def print_monthly_chart(self, weather_readings, year, month):
         print(f"{datetime(year, month, 1).strftime('%B %Y')}")
-        for reading in weather_readings.readings:
-            if (reading.date.year != year or reading.date.month != month or 
-            not (reading.max_temperature and reading.min_temperature)):
-                continue
-            print(f"{reading.date.day:02d} {'+' * reading.max_temperature} {reading.max_temperature}C")
-            print(f"{reading.date.day:02d} {'+' * reading.min_temperature} {reading.min_temperature}C")
+        for weather_reading in weather_readings:
+            print(f"{weather_reading.date.day:02d} {'+' * weather_reading.max_temperature} {weather_reading.max_temperature}C")
+            print(f"{weather_reading.date.day:02d} {'+' * weather_reading.min_temperature} {weather_reading.min_temperature}C")
