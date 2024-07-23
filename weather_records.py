@@ -24,7 +24,7 @@ class WeatherRecords:
         }
 
         for attribute, value in weather_attributes.items():
-            if value is not None:
+            if value:
                 if attribute not in self.total_weather_values:
                     self.total_weather_values[attribute] = 0
                     self.max_weather_records[attribute] = weather_reading
