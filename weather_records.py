@@ -1,57 +1,48 @@
 class WeatherRecords:
     def __init__(self):
-        self.weather_readings = []
+        self.weather_readings = []  
+        self.total_weather_values = {}  
+        self.weather_reading_count = 0  
+        self.max_weather_records = {}  
+        self.min_weather_records = {}  
 
     def add_weather_reading(self, weather_reading):
         self.weather_readings.append(weather_reading)
+        self.update_weather_calculations(weather_reading)
 
     def filter_weather_readings_by_month(self, year, month):
         return [
-            weather_reading for weather_reading in self.weather_readings 
-            if weather_reading.date.year == year and 
-            weather_reading.date.month == month and
-            weather_reading.max_temperature and 
-            weather_reading.min_temperature
+            reading for reading in self.weather_readings
+            if reading.date.year == year and reading.date.month == month
         ]
-    
-    def aggregate_weather_data(self, filtered_weather_readings):
-        total_max_temperature = 0
-        total_min_temperature = 0
-        total_mean_humidity = 0
-        weather_reading_count = 0
 
-        for weather_reading in filtered_weather_readings:
-            if weather_reading.max_temperature:
-                total_max_temperature += weather_reading.max_temperature
-            if weather_reading.min_temperature:
-                total_min_temperature += weather_reading.min_temperature
-            if weather_reading.mean_humidity:
-                total_mean_humidity += weather_reading.mean_humidity
-            weather_reading_count += 1
+    def update_weather_calculations(self, weather_reading):
+        weather_attributes = {
+            'max_temperature': weather_reading.max_temperature,
+            'min_temperature': weather_reading.min_temperature,
+            'mean_humidity': weather_reading.mean_humidity
+        }
 
-        return (
-            total_max_temperature, 
-            total_min_temperature, 
-            total_mean_humidity, 
-            weather_reading_count
-        )
+        for attribute, value in weather_attributes.items():
+            if value is not None:
+                if attribute not in self.total_weather_values:
+                    self.total_weather_values[attribute] = 0
+                    self.max_weather_records[attribute] = weather_reading
+                    self.min_weather_records[attribute] = weather_reading
+                
+                self.total_weather_values[attribute] += value
+                if value > getattr(self.max_weather_records[attribute], attribute):
+                    self.max_weather_records[attribute] = weather_reading
+                if value < getattr(self.min_weather_records[attribute], attribute):
+                    self.min_weather_records[attribute] = weather_reading
+        
+        self.weather_reading_count += 1
 
-    def compute_weather_averages(
-        self, 
-        total_max_temperature, 
-        total_min_temperature, 
-        total_mean_humidity, 
-        weather_reading_count
-    ):
-        if weather_reading_count == 0:
-            return None, None, None
+    def compute_weather_averages(self):
+        if self.weather_reading_count == 0:
+            return {attribute: None for attribute in self.total_weather_values}
 
-        avg_max_temperature = total_max_temperature // weather_reading_count
-        avg_min_temperature = total_min_temperature // weather_reading_count
-        avg_mean_humidity = total_mean_humidity // weather_reading_count
-
-        return (
-            avg_max_temperature, 
-            avg_min_temperature, 
-            avg_mean_humidity
-        )
+        return {
+            attribute: self.total_weather_values[attribute] / self.weather_reading_count
+            for attribute in self.total_weather_values
+        }

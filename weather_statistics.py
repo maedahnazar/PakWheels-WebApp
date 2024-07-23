@@ -1,4 +1,5 @@
 from weather_report_printer import WeatherReportPrinter
+from weather_records import WeatherRecords
 
 
 class WeatherStatistics:
@@ -43,24 +44,23 @@ class WeatherStatistics:
 
     def compute_monthly_averages(self, year, month):
         filtered_weather_readings = self.weather_records.filter_weather_readings_by_month(year, month)
-        total_max_temperature, total_min_temperature, total_mean_humidity, weather_readings_count = (
-            self.weather_records.aggregate_weather_data(filtered_weather_readings)
-        )
-        return self.weather_records.compute_weather_averages(
-            total_max_temperature, 
-            total_min_temperature, 
-            total_mean_humidity, 
-            weather_readings_count
-        )
+
+        if filtered_weather_readings:
+            self.weather_records.update_weather_calculations(filtered_weather_readings)
+            weather_averages = self.weather_records.compute_weather_averages()
+            return weather_averages
 
     def generate_monthly_average_report(self, year, month):
-        WeatherReportPrinter.print_monthly_average_report(
-            *self.compute_monthly_averages(year, month)
-        )
+        filtered_weather_readings = self.weather_records.filter_weather_readings_by_month(year, month)
+        
+        for weather_reading in filtered_weather_readings:
+            self.weather_records.update_weather_calculations(weather_reading)
+        
+        weather_averages = self.weather_records.compute_weather_averages()
+        WeatherReportPrinter().print_monthly_average_report(weather_averages)
 
     def generate_monthly_chart(self, year, month):
-        WeatherReportPrinter().print_monthly_chart(
-            self.weather_records.filter_weather_readings_by_month(year, month), 
-            year, 
-            month
+        WeatherReportPrinter.print_monthly_chart(
+            self.weather_records, year, month
         )
+        

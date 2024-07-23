@@ -32,7 +32,7 @@ def main():
 
     args = parser.parse_args()
     weather_parser = WeatherFileParser()
-    weather_readings = weather_parser.parse_files(args.directory)
+    weather_readings = weather_parser.parse_weather_files_in_directory(args.directory)
 
     if not weather_readings:
         return
