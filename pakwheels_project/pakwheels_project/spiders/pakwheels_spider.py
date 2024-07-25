@@ -15,7 +15,7 @@ class PakWheelsSpider(scrapy.Spider):
         cookies = {
             "countrycurrency": "PKR",
         }
-        for url in self.strt_urls:
+        for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse_root_url, cookies=cookies)
 
     def parse_root_url(self, response):
