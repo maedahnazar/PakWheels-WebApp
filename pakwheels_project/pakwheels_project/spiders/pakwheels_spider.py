@@ -1,15 +1,9 @@
 import scrapy
-import logging
 
 class PakWheelsSpider(scrapy.Spider):
     name = 'pakwheels'
     allowed_domains = ['pakwheels.com']
     start_urls = ['https://www.pakwheels.com/used-cars/search/-/']
-
-    custom_settings = {
-        'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'COOKIES_ENABLED': True,
-    }
 
     def start_requests(self):
         cookies = {
@@ -19,10 +13,8 @@ class PakWheelsSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse_root_url, cookies=cookies)
 
     def parse_root_url(self, response):
-        ad_links = response.css('a.car-name.ad-detail-path::attr(href)').getall()
+        ad_links = response.css('div.col-md-9.search-listing.pull-right a.car-name.ad-detail-path::attr(href)').getall()
         
-        logging.info(f'Found {len(ad_links)} ad links on the page.')
-
         for link in ad_links:
             yield response.follow(link, self.parse_ad_details)
 
@@ -39,6 +31,7 @@ class PakWheelsSpider(scrapy.Spider):
         seller_comments = self.extract_seller_comments(response)
         location = self.extract_location(response)
         price = self.extract_price(response)
+        inspection_report = self.extract_inspection_report(response)
         
         yield {
             'title': title,
@@ -48,6 +41,7 @@ class PakWheelsSpider(scrapy.Spider):
             'car_details': car_details,
             'car_features': car_features,
             'seller_comments': seller_comments,
+            'inspection_report': inspection_report,
             'link': response.url,
         }
 
@@ -61,33 +55,43 @@ class PakWheelsSpider(scrapy.Spider):
         return response.css('div.price-box strong::text').get()
 
     def extract_images_links(self, response):
-        return response.css('li::attr(data-src)').getall()
+        return response.css('div.price-box span.price::text').get()
 
     def extract_car_details(self, response):
-        car_details = {}
-        details_list = response.css('ul#scroll_car_detail li')
-        
-        for i in range(len(details_list) - 1):
-            key = details_list[i].css('li.ad-data::text').get()
-            if key:
-                value = details_list[i + 1].css('li *::text').getall()
-                value = ''.join(value).strip()
-                car_details[key.strip()] = value if value else 'N/A'
-        
-        return car_details
+        details = {}
+        detail_elements = response.css('#scroll_car_detail li.ad-data')
+        for detail_element in detail_elements:
+            key = detail_element.css('::text').get()
+            value = detail_element.xpath('following-sibling::li[1]//text()').get()
+            if key and value:
+                details[key.strip()] = value.strip()
+        return details
 
     def extract_car_features(self, response):
         return response.css('ul.list-unstyled.car-feature-list.nomargin li::text').getall()
 
     def extract_seller_comments(self, response):
-        comments_div = response.xpath('//h2[@id="scroll_seller_comments"]/following-sibling::div[1]')
-        comments = comments_div.xpath('text()').getall()
-        comments = [comment.strip() for comment in comments if comment.strip()]
-        return comments
+        comments_div = response.css('#scroll_seller_comments ~ div')
+        return comments_div.css('::text').getall()
 
-    def extract_description(self, response):
-        return response.css('div.description-content p::text').getall()
+    def extract_inspection_report(self, response):
+        report = {}
+        inspected_date = response.css('div.carsure-detail-header.clearfix p.generic-gray::text').get()
+        overall_rating = response.css('div.carsure-detail-header.clearfix div.right.pull-right.primary-lang::text').get()
+        grade = response.xpath('//div[@class="carsure-detail-header clearfix"]/h3[contains(text(), "Grade")]/following-sibling::span/text()').get()
 
-    def extract_features(self, response):
-        return response.css('ul.feature-list li::text').getall()
+        if inspected_date:
+            report['Inspected Date'] = inspected_date.strip()
+        if overall_rating:
+            report['Overall Rating'] = overall_rating.strip()
+        if grade:
+            report['Grade'] = grade.strip()
 
+        additional_details = response.css('ul.carsure-bar-outer.carsure-bar-show.list-unstyled.clearfix li')
+        for detail in additional_details:
+            key = detail.css('p::text').get()
+            value = detail.css('div.bar-count.pull-right::text').get()
+            if key and value:
+                report[key.strip()] = value.strip()
+
+        return report
