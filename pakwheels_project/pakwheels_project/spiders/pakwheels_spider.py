@@ -55,7 +55,7 @@ class PakWheelsSpider(scrapy.Spider):
         return response.css('div.price-box strong::text').get()
 
     def extract_images_links(self, response):
-        return response.css('div.price-box span.price::text').get()
+        return response.css('li::attr(data-src)').getall()
 
     def extract_car_details(self, response):
         details = {}
