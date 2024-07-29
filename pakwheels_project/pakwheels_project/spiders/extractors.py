@@ -16,8 +16,8 @@ class PakWheelsExtractor:
 
     def extract_car_details(response):
         car_details = {}
-        car_detail_elements = response.css('#scroll_car_detail li.ad-data')
-        for detail_element in car_detail_elements:
+
+        for detail_element in response.css('#scroll_car_detail li.ad-data'):
             if key := detail_element.css('::text').get():
                 if value := detail_element.xpath('following-sibling::li[1]//text()').get():
                     car_details[key.strip()] = value.strip()
@@ -36,10 +36,12 @@ class PakWheelsExtractor:
         
         if inspected_date := response.css('div.carsure-detail-header.clearfix p.generic-gray::text').get():
             car_inspection_report['Inspected Date'] = inspected_date.strip()
+
         if overall_rating := response.css(
             'div.carsure-detail-header.clearfix div.right.pull-right.primary-lang::text'
         ).get():
             car_inspection_report['Overall Rating'] = overall_rating.strip()
+
         if grade := response.xpath(
             '//div[@class="carsure-detail-header clearfix"]/h3[contains(text(), "Grade")]'
             '/following-sibling::span/text()'
