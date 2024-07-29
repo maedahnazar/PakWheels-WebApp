@@ -1,5 +1,7 @@
 import scrapy
 
+from .constants import CAR_INSPECTED_DATE, CAR_OVERALL_RATING, CAR_GRADE
+
 
 class PakWheelsExtractor:
     def extract_title(response):
@@ -18,9 +20,11 @@ class PakWheelsExtractor:
         car_details = {}
 
         for detail_element in response.css('#scroll_car_detail li.ad-data'):
-            if key := detail_element.css('::text').get():
-                if value := detail_element.xpath('following-sibling::li[1]//text()').get():
-                    car_details[key.strip()] = value.strip()
+            if (
+                (key := detail_element.css('::text').get()) and
+                (value := detail_element.xpath('following-sibling::li[1]//text()').get())
+            ):
+                car_details[key.strip()] = value.strip()
 
         return car_details
 
@@ -28,30 +32,28 @@ class PakWheelsExtractor:
         return response.css('ul.list-unstyled.car-feature-list.nomargin li::text').getall()
 
     def extract_car_seller_comments(response):
-        seller_comments = response.css('#scroll_seller_comments ~ div')
-        return seller_comments.css('::text').getall()
+        seller_comments = response.css('#scroll_seller_comments ~ div ::text').getall()
+        return seller_comments
 
     def extract_inspection_report(response):
         car_inspection_report = {}
         
-        if inspected_date := response.css('div.carsure-detail-header.clearfix p.generic-gray::text').get():
-            car_inspection_report['Inspected Date'] = inspected_date.strip()
+        if car_inspected_date := response.css('div.carsure-detail-header.clearfix p.generic-gray::text').get():
+            car_inspection_report[CAR_INSPECTED_DATE] = car_inspected_date.strip()
 
         if overall_rating := response.css(
             'div.carsure-detail-header.clearfix div.right.pull-right.primary-lang::text'
         ).get():
-            car_inspection_report['Overall Rating'] = overall_rating.strip()
+            car_inspection_report[CAR_OVERALL_RATING] = overall_rating.strip()
 
-        if grade := response.xpath(
-            '//div[@class="carsure-detail-header clearfix"]/h3[contains(text(), "Grade")]'
-            '/following-sibling::span/text()'
-        ).get():
-            car_inspection_report['Grade'] = grade.strip()
+        if grade := response.css('div.right.mt0::text').get():
+            car_inspection_report[CAR_GRADE] = grade.strip()
 
         for detail in response.css('ul.carsure-bar-outer.carsure-bar-show.list-unstyled.clearfix li'):
-            if key := detail.css('p::text').get():
-                if value := detail.css('div.bar-count.pull-right::text').get():
-                    car_inspection_report[key.strip()] = value.strip()
+            if (
+                (key := detail.css('p::text').get()) and 
+                (value := detail.css('div.bar-count.pull-right::text').get())
+            ):
+                car_inspection_report[key.strip()] = value.strip()
 
         return car_inspection_report
-    
