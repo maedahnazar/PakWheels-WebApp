@@ -1,3 +1,6 @@
 __pycache__/
-ads.json
-pakwheels_scraper/
+*.pyc
+
+**/__init__.py
+
+pakwheels_ads.json
