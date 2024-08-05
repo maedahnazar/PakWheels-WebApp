@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'signup' %}">Signup</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Car Ads</h1>
+        <ul>
+            {% for ad in ads %}
+                <li>
+                    <h2>{{ ad.title }}</h2>
+                    <p>Price: {{ ad.price }}</p>
+                    <p>Location: {{ ad.location }}</p>
+                </li>
+            {% empty %}
+                <li>No ads available.</li>
+            {% endfor %}
+        </ul>
+    </main>
+</body>
+</html>

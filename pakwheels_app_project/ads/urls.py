@@ -1,9 +1,10 @@
 from django.urls import path
-from . import views
+
+from ads.views import home, display_ads, ad_detail
 
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('ad_list/', views.ad_list, name='ad_list'),
-    path('ad/<int:ad_id>/', views.ad_detail, name='ad_detail'),
+    path('', home, name='home'),
+    path('display_ads/', display_ads, name='display_ads'),
+    path('ad/<int:ad_id>/', ad_detail, name='ad_detail'),
 ]
