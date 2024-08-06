@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ad.title }} Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .ad-detail {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .ad-detail h1 {
+            margin-top: 0;
+        }
+
+        .ad-detail img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="ad-detail">
+            <h1>{{ ad.title }}</h1>
+            {% if car %}
+                {% if car.images.exists %}
+                    {% for image in car.images.all %}
+                        <img src="{{ image.external_image_url }}" alt="{{ ad.title }}">
+                    {% endfor %}
+                {% endif %}
+                <h2>Car Details</h2>
+                <p><strong>Registered In:</strong> {{ car.registered_in }}</p>
+                <p><strong>Color:</strong> {{ car.color }}</p>
+                <p><strong>Assembly:</strong> {{ car.assembly }}</p>
+                <p><strong>Engine Capacity:</strong> {{ car.engine_capacity }} cc</p>
+                <p><strong>Body Type:</strong> {{ car.body_type }}</p>
+            {% else %}
+                <p>No car details available for this ad.</p>
+            {% endif %}
+            <p><strong>Price:</strong> {{ ad.price }}</p>
+            <p><strong>Location:</strong> {{ ad.location }}</p>
+            <p><strong>Seller Comments:</strong> {{ ad.seller_comments }}</p>
+        </div>
+    </div>
+</body>
+</html>

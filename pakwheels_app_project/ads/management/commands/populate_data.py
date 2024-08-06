@@ -2,10 +2,10 @@ import json
 from datetime import datetime
 
 from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
 
 from ads.models import Ad
 from cars.models import Car, Feature, Image, Source, InspectionReport
-from users.models import User
 
 
 class Command(BaseCommand):
@@ -16,8 +16,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         with open(kwargs['json_file'], 'r') as file:
-            user = self.create_or_get_user()
             for ad_entry in json.load(file):
+                user = self.create_or_get_user()
                 ad = self.create_ad(ad_entry, user)
                 car = self.create_car(ad, ad_entry)
                 self.add_features_to_car(car, ad_entry['car_features'])
@@ -27,91 +27,76 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Successfully populated the database'))
 
     def create_or_get_user(self):
+        User = get_user_model()
         user, created = User.objects.get_or_create(username='pakwheels')
-        user.set_password('pakwheels_password')
-        user.save()
+
+        if created:
+            user.set_password('pakwheels_password')
+            user.save()
+        else:
+            user.set_password('pakwheels_password')
+            user.save(update_fields=['password'])
 
         return user
 
     def create_ad(self, ad_entry, user):
-        price = self.parse_price(ad_entry.get('price', ''))
-
         return Ad.objects.create(
             user=user,
             title=ad_entry['title'],
-            price=price,
+            price=self.parse_price(ad_entry.get('price', '')),
             location=ad_entry['location'],
             seller_comments=', '.join(ad_entry.get('seller_comments', []))
         )
 
     def parse_price(self, price_value):
-        cleaned_price = price_value.replace('PKR ', '').replace(',', '') 
-        
-        try:
-            price = float(cleaned_price)
-        except ValueError:
-            price = 0.0
-
-        return price
-
+        return float(price_value.replace('PKR ', '').replace(',', '') or 0.0)
 
     def create_car(self, ad, ad_entry):
-        last_updated = self.parse_date(ad_entry.get('Last Updated:', None))
-
         return Car.objects.create(
             ad=ad,
             registered_in=ad_entry.get('Registered In', 'Unknown'),
             color=ad_entry.get('Color', 'Unknown'),
             assembly=ad_entry.get('Assembly', 'Unknown'),
             engine_capacity=self.parse_engine_capacity(ad_entry.get('Engine Capacity', '0')),
-            body_type=ad_entry.get('Body Type', 'Unknown'),
-            last_updated=last_updated
+            body_type=ad_entry.get('Body Type', 'Unknown')
         )
 
     def parse_date(self, date_str):
         return datetime.strptime(date_str, '%b %d, %Y') if date_str else None
 
     def parse_engine_capacity(self, engine_capacity):
-        cleaned_engine_capacity = engine_capacity.replace(' cc', '')
-
-        try:
-            capacity = int(cleaned_engine_capacity)
-        except ValueError:
-            capacity = 0
-
-        return capacity
+        return int(engine_capacity.replace(' cc', '') or 0)
 
     def add_features_to_car(self, car, feature_names):
-        for feature_name in feature_names:
-            feature, created = Feature.objects.get_or_create(name=feature_name.strip())
-            car.features.add(feature)
+        feature_instances = [
+            Feature.objects.get_or_create(name=feature_name.strip())[0]
+            for feature_name in feature_names
+        ]
+        
+        car.features.set(feature_instances)
 
     def add_images_to_car(self, car, image_urls):
-        for image_url in image_urls:
-            Image.objects.create(
-                car=car,
-                image_url=image_url
-            )
+        image_instances = [Image(car=car, external_image_url=image_url) for image_url in image_urls]
+        Image.objects.bulk_create(image_instances)
 
     def create_inspection_report(self, car, inspection_data):
-        if inspection_data and any(inspection_data.values()):
-            source, created = Source.objects.get_or_create(name='Pak Wheels')
-            inspected_date = self.parse_date(inspection_data.get('inspected_date', None))
+        if not (inspection_data and any(inspection_data.values())):
+            self.stdout.write(self.style.WARNING(f'No valid inspection report data for Car: {car}'))
+            return
 
-            inspection_report = InspectionReport.objects.create(
-                car=car,
-                source=source,
-                inspected_date=inspected_date,
-                overall_rating=inspection_data.get('overall_rating', None),
-                grade=inspection_data.get('grade', None),
-                exterior_body=inspection_data.get('exterior_body', None),
-                engine_transmission_clutch=inspection_data.get('engine_transmission_clutch', None),
-                suspension_steering=inspection_data.get('suspension_steering', None),
-                interior=inspection_data.get('interior', None),
-                ac_heater=inspection_data.get('ac_heater', None)
-            )
+        source, created = Source.objects.get_or_create(name='Pak Wheels')
 
-            self.stdout.write(self.style.SUCCESS(f'Successfully created InspectionReport: {inspection_report}'))
+        inspection_report = InspectionReport.objects.create(
+            car=car,
+            source=source,
+            inspected_date=self.parse_date(inspection_data.get('inspected_date', None)),
+            overall_rating=inspection_data.get('overall_rating', None),
+            grade=inspection_data.get('grade', None),
+            exterior_body=inspection_data.get('exterior_body', None),
+            engine_transmission_clutch=inspection_data.get('engine_transmission_clutch', None),
+            suspension_steering=inspection_data.get('suspension_steering', None),
+            interior=inspection_data.get('interior', None),
+            ac_heater=inspection_data.get('ac_heater', None)
+        )
 
-        else:
-            self.stdout.write(self.style.WARNING(f'No valid inspection report data for Ad: {Ad.title}'))
+        self.stdout.write(self.style.SUCCESS(f'Successfully created InspectionReport: {inspection_report}'))

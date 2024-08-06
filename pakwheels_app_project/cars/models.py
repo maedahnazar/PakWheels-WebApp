@@ -10,27 +10,31 @@ class Car(models.Model):
     assembly = models.TextField()
     engine_capacity = models.IntegerField()
     body_type = models.TextField()
-    last_updated = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True) 
+    modified_at = models.DateTimeField(auto_now=True)
 
-    ad = models.OneToOneField(Ad, on_delete=models.CASCADE, related_name='car')
+    ad = models.OneToOneField('ads.Ad', on_delete=models.CASCADE, related_name='car')
 
     def __str__(self):
-        return (f"Color: {self.color} Body Type: {self.body_type} Engine Capacity{self.engine_capacity}cc"
-                f"Assembly{self.assembly}, Registered in {self.registered_in}, Ad: {self.ad.title}")
+        return (f"{self.id} - {self.body_type}, {self.engine_capacity}cc")
 
 class Feature(models.Model):
     name = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True) 
+    modified_at = models.DateTimeField(auto_now=True)
 
-    cars = models.ManyToManyField(Car, related_name='features')
+    cars = models.ManyToManyField('cars.Car', related_name='features')
 
     def __str__(self):
-            return f"Feature: {self.name}"
+            return self.name
 
 class Source(models.Model):
     name = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True) 
+    modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Source: {self.name}"
+        return self.name
 
 class InspectionReport(models.Model):
     inspected_date = models.DateField(null=True, blank=True)
@@ -41,21 +45,22 @@ class InspectionReport(models.Model):
     suspension_steering = models.TextField(null=True, blank=True)
     interior = models.TextField(null=True, blank=True)
     ac_heater = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True) 
+    modified_at = models.DateTimeField(auto_now=True)
 
-    car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    source = models.ForeignKey(Source, on_delete=models.CASCADE)
+    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE)
+    source = models.ForeignKey('cars.Source', on_delete=models.CASCADE)
 
     def __str__(self):
-        return (f"Inspection Report for {self.car.color} {self.car.body_type} "
-                f"({self.inspected_date}) - Source: {self.source.name}, "
-                f"Rating: {self.overall_rating}, Grade: {self.grade}")
+        return (f"{self.inspected_date}, {self.overall_rating}, {self.grade}")
 
 class Image(models.Model):
     external_image_url = models.URLField(blank=True, null=True)
     uploaded_image = models.ImageField(upload_to='car_images/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True) 
+    modified_at = models.DateTimeField(auto_now=True)
 
-    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='images')
+    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='images')
 
     def __str__(self):
-        return (f"Image for {self.car.color} {self.car.body_type} - "
-                f"URL: {self.external_image_url}, Path: {self.uploaded_image}")
+        return (f"{self.external_image_url}, {self.uploaded_image}")

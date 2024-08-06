@@ -4,7 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 
-from .forms import UserRegisterForm
+from users.forms import UserRegisterForm 
 
 
 @require_http_methods(["GET", "POST"])
