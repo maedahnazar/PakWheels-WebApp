@@ -16,9 +16,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         with open(kwargs['json_file'], 'r') as file:
-            for ad_entry in json.load(file):
-                user = self.create_or_get_user()
-                ad = self.create_ad(ad_entry, user)
+            for ad_entry in json.load(file):     
+                ad = self.create_ad(ad_entry, self.create_or_get_user())
                 car = self.create_car(ad, ad_entry)
                 self.add_features_to_car(car, ad_entry['car_features'])
                 self.add_images_to_car(car, ad_entry['images'])
