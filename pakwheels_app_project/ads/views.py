@@ -7,5 +7,4 @@ def home(request):
     return render(request, 'ads/home.html', {'ads': Ad.objects.all()})
 
 def ad_detail(request, ad_id):
-    ad = get_object_or_404(Ad, id=ad_id)
-    return render(request, 'ads/ad_detail.html', {'ad': ad, 'car': getattr(ad, 'car', None) })
+    return render(request, 'ads/ad_detail.html', {'ad': get_object_or_404(Ad, id=ad_id)})

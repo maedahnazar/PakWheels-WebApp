@@ -13,7 +13,7 @@ class Car(models.Model):
     created_at = models.DateTimeField(auto_now_add=True) 
     modified_at = models.DateTimeField(auto_now=True)
 
-    ad = models.OneToOneField(Ad, on_delete=models.CASCADE, related_name='car')
+    ad = models.OneToOneField('ads.Ad', on_delete=models.CASCADE, related_name='car')
 
     def __str__(self):
         return (f"{self.id} - {self.body_type}, {self.engine_capacity}cc")

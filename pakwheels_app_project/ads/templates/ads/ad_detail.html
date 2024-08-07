@@ -85,6 +85,15 @@
             font-size: 1em;
             margin: 10px 0;
         }
+
+        .ad-detail ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ad-detail ul li {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -92,11 +101,11 @@
         <div class="ad-detail">
             <h1>{{ ad.title }}</h1>
             
-            {% if car %}
-                {% if car.images.exists %}
+            {% if ad.car %}
+                {% if ad.car.images.exists %}
                     <div class="slider">
                         <div class="slides">
-                            {% for image in car.images.all %}
+                            {% for image in ad.car.images.all %}
                                 <div class="slide">
                                     <img src="{{ image.external_image_url }}" alt="{{ ad.title }}">
                                 </div>
@@ -107,15 +116,15 @@
                     </div>
                 {% endif %}
                 <h2>Car Details</h2>
-                <p><strong>Registered In:</strong> {{ car.registered_in }}</p>
-                <p><strong>Color:</strong> {{ car.color }}</p>
-                <p><strong>Assembly:</strong> {{ car.assembly }}</p>
-                <p><strong>Engine Capacity:</strong> {{ car.engine_capacity }} cc</p>
-                <p><strong>Body Type:</strong> {{ car.body_type }}</p>
+                <p><strong>Registered In:</strong> {{ ad.car.registered_in }}</p>
+                <p><strong>Color:</strong> {{ ad.car.color }}</p>
+                <p><strong>Assembly:</strong> {{ ad.car.assembly }}</p>
+                <p><strong>Engine Capacity:</strong> {{ ad.car.engine_capacity }} cc</p>
+                <p><strong>Body Type:</strong> {{ ad.car.body_type }}</p>
 
                 <h2>Car Features</h2>
                 <ul>
-                    {% for feature in car.features.all %}
+                    {% for feature in ad.car.features.all %}
                         <li>{{ feature.name }}</li>
                     {% endfor %}
                 </ul>
@@ -158,7 +167,7 @@
             slideIndex = (slideIndex + step + slides.length) % slides.length;
             showSlides();
         }
-        showSlides(); 
+        showSlides(); // Initial call to set up slides
     </script>
 </body>
 </html>
