@@ -30,8 +30,8 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.User'
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 
 
@@ -51,14 +51,22 @@ DEFAULT_APPS = [
     'django.contrib.staticfiles',
 ]
 
+THIRD_PARTY_APPS = [
+    'django_extensions',
+]
+
 
 CUSTOM_APPS = [
     'users',
     'ads',
-    'cars'
+    'cars',
 ]
 
-INSTALLED_APPS = DEFAULT_APPS + CUSTOM_APPS
+
+
+
+
+INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + CUSTOM_APPS
 
 
 MIDDLEWARE = [

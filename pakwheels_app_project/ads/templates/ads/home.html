@@ -34,16 +34,30 @@
             box-sizing: border-box;
             text-decoration: none;
             color: inherit;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .ad-card h2 {
             font-size: 1.5em;
-            margin-top: 0;
+            margin: 0;
         }
 
         .ad-card p {
             font-size: 1em;
             margin: 10px 0;
+        }
+
+        .ad-info {
+            flex: 1;
+        }
+
+        .ad-image {
+            width: 150px;
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover;
         }
 
         @media (max-width: 768px) {
@@ -55,6 +69,13 @@
         @media (max-width: 480px) {
             .ad-card {
                 width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .ad-image {
+                margin-top: 10px;
+                width: 100%;
             }
         }
     </style>
@@ -65,11 +86,16 @@
         <div class="ad-cards">
             {% for ad in ads %}
                 <a href="{% url 'ad_detail' ad.id %}" class="ad-card">
-                    <div class="ad-details">
+                    <div class="ad-info">
                         <h2>{{ ad.title }}</h2>
                         <p>Price: {{ ad.price }}</p>
                         <p>Location: {{ ad.location }}</p>
                     </div>
+                    {% if ad.car.images.all %}
+                        {% with ad.car.images.first as car_image %}
+                            <img src="{{ car_image.external_image_url }}" alt="Car Image" class="ad-image">
+                        {% endwith %}
+                    {% endif %}
                 </a>
             {% empty %}
                 <p>No ads available.</p>

@@ -49,20 +49,20 @@ class Command(BaseCommand):
         )
 
     def parse_price(self, price_value):
-        return float(price_value.replace('PKR ', '').replace(',', '') or 0.0)
+        return float(price_value.replace('PKR ', '').replace(',', '') or '0')
 
     def create_car(self, ad, ad_entry):
         return Car.objects.create(
             ad=ad,
-            registered_in=ad_entry.get('Registered In', 'Unknown'),
-            color=ad_entry.get('Color', 'Unknown'),
-            assembly=ad_entry.get('Assembly', 'Unknown'),
-            engine_capacity=self.parse_engine_capacity(ad_entry.get('Engine Capacity', '0')),
-            body_type=ad_entry.get('Body Type', 'Unknown')
+            registered_in=ad_entry['car_details'].get('Registered In', 'Unknown'),
+            color=ad_entry['car_details'].get('Color', 'Unknown'),
+            assembly=ad_entry['car_details'].get('Assembly', 'Unknown'),
+            engine_capacity=self.parse_engine_capacity(ad_entry['car_details'].get('Engine Capacity', '0')),
+            body_type=ad_entry['car_details'].get('Body Type', 'Unknown')
         )
-
+    
     def parse_date(self, date_str):
-        return datetime.strptime(date_str, '%b %d, %Y') if date_str else None
+        return datetime.strptime(date_str, '%m/%d/%y') if date_str else None
 
     def parse_engine_capacity(self, engine_capacity):
         return int(engine_capacity.replace(' cc', '') or 0)
@@ -85,18 +85,18 @@ class Command(BaseCommand):
             return
 
         source, created = Source.objects.get_or_create(name='Pak Wheels')
-
+        
         inspection_report = InspectionReport.objects.create(
             car=car,
             source=source,
-            inspected_date=self.parse_date(inspection_data.get('inspected_date', None)),
-            overall_rating=inspection_data.get('overall_rating', None),
-            grade=inspection_data.get('grade', None),
-            exterior_body=inspection_data.get('exterior_body', None),
-            engine_transmission_clutch=inspection_data.get('engine_transmission_clutch', None),
-            suspension_steering=inspection_data.get('suspension_steering', None),
-            interior=inspection_data.get('interior', None),
-            ac_heater=inspection_data.get('ac_heater', None)
+            inspected_date=self.parse_date(inspection_data.get('Inspected Date', None)),
+            overall_rating=inspection_data.get('Overall Rating', None),
+            grade=inspection_data.get('Grade', None),
+            exterior_body=inspection_data.get('Exterior & Body', None),
+            engine_transmission_clutch=inspection_data.get('Engine/Transmission/Clutch', None),
+            suspension_steering=inspection_data.get('Suspension/Steering', None),
+            interior=inspection_data.get('Interior', None),
+            ac_heater=inspection_data.get('AC/Heater', None)
         )
 
         self.stdout.write(self.style.SUCCESS(f'Successfully created InspectionReport: {inspection_report}'))
