@@ -27,8 +27,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Successfully populated the database'))
 
     def create_or_get_user(self):
-        User = get_user_model()
-        user, created = User.objects.get_or_create(username='pakwheels')
+        user, created = get_user_model().objects.get_or_create(username='pakwheels')
 
         if created:
             user.set_password('pakwheels_password')

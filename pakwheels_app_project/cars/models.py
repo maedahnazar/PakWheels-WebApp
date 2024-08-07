@@ -26,7 +26,7 @@ class Feature(models.Model):
     cars = models.ManyToManyField('cars.Car', related_name='features')
 
     def __str__(self):
-            return self.name
+        return self.name
 
 class Source(models.Model):
     name = models.TextField()
