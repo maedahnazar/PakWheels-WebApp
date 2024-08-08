@@ -11,13 +11,16 @@ from users.forms import UserRegisterForm
 def user_signup(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
+
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
             return redirect('login')
+        
     else:
         form = UserRegisterForm()
+
     return render(request, 'users/signup.html', {'form': form})
 
 
@@ -25,6 +28,7 @@ def user_signup(request):
 def user_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
+
         if form.is_valid():
             username=form.cleaned_data.get('username')
             user = authenticate(
@@ -32,15 +36,20 @@ def user_login(request):
                 username=username, 
                 password=form.cleaned_data.get('password')
             )
+
             if user:
                 login(request, user)
                 messages.info(request, f'You are now logged in as {username}.')
                 return redirect('home')
+            
             else:
                 messages.error(request, 'Invalid username or password.')
+
         else:
             for error in form.non_field_errors():
                 messages.error(request, error)
+
     else:
         form = AuthenticationForm()
+        
     return render(request, 'users/login.html', {'form': form})
