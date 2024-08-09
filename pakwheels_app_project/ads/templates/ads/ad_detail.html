@@ -12,6 +12,19 @@
             background-color: #f4f4f4;
         }
 
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        header a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
         .container {
             width: 80%;
             margin: auto;
@@ -94,9 +107,25 @@
         .ad-detail ul li {
             margin: 5px 0;
         }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">Signup</a>
+    </header>
+
     <div class="container">
         <div class="ad-detail">
             <h1>{{ ad.title }}</h1>
@@ -148,11 +177,15 @@
                 <p>No inspection report available for this ad.</p>
             {% endif %}
 
-            <p><strong>Price:</strong> {{ ad.price }}</p>
+            <p><strong>Price:</strong> {{ ad.price }} lacs</p>
             <p><strong>Location:</strong> {{ ad.location }}</p>
-            <p><strong>Seller Comments:</strong> {{ ad.seller_comments }}</p>
+            <p><strong>Seller Comments:</strong> {{ ad.seller_comments|linebreaksbr }}</p>
         </div>
     </div>
+
+    <footer>
+        &copy; 2024 Your Company Name. All rights reserved.
+    </footer>
 
     <script>
         let slideIndex = 0;

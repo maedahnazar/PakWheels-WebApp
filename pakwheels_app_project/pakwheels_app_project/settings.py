@@ -60,6 +60,7 @@ CUSTOM_APPS = [
     'users',
     'ads',
     'cars',
+    'core',
 ]
 
 

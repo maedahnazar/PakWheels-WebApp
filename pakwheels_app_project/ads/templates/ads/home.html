@@ -12,6 +12,19 @@
             background-color: #f4f4f4;
         }
 
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        header a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
         .container {
             width: 80%;
             margin: auto;
@@ -60,6 +73,16 @@
             object-fit: cover;
         }
 
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
         @media (max-width: 768px) {
             .ad-card {
                 width: calc(50% - 40px);
@@ -81,14 +104,26 @@
     </style>
 </head>
 <body>
+    <header>
+        <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'signup' %}">Signup</a>
+    </header>
+
     <div class="container">
         <h1>All Ads</h1>
+        <form method="get">
+            <input type="text" name="location" placeholder="Filter by location" value="{{ request.GET.location }}">
+            <input type="number" name="min_price" placeholder="Min Price" value="{{ request.GET.min_price }}">
+            <input type="number" name="max_price" placeholder="Max Price" value="{{ request.GET.max_price }}">
+            <button type="submit">Filter</button>
+        </form>
         <div class="ad-cards">
             {% for ad in ads %}
                 <a href="{% url 'ad_detail' ad.id %}" class="ad-card">
                     <div class="ad-info">
                         <h2>{{ ad.title }}</h2>
-                        <p>Price: {{ ad.price }}</p>
+                        <p>Price: {{ ad.price }} lacs</p>
                         <p>Location: {{ ad.location }}</p>
                     </div>
                     {% if ad.car.images.all %}
@@ -102,5 +137,9 @@
             {% endfor %}
         </div>
     </div>
+
+    <footer>
+        &copy; Pak Wheels. All rights reserved.
+    </footer>
 </body>
 </html>

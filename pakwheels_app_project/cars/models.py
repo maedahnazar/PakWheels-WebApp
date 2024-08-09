@@ -1,42 +1,39 @@
 from django.db import models
-from django.conf import settings
 
-from ads.models import Ad
+from core.mixins import TimestampMixin  
 
 
-class Car(models.Model):
+class Car(TimestampMixin):
     registered_in = models.TextField()
     color = models.TextField()
     assembly = models.TextField()
     engine_capacity = models.IntegerField()
     body_type = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True) 
-    modified_at = models.DateTimeField(auto_now=True)
 
     ad = models.OneToOneField('ads.Ad', on_delete=models.CASCADE, related_name='car')
 
     def __str__(self):
-        return (f"{self.id} - {self.body_type}, {self.engine_capacity}cc")
+        return f"{self.id} - {self.body_type} | {self.engine_capacity}cc"
 
-class Feature(models.Model):
+class Feature(TimestampMixin):
     name = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True) 
-    modified_at = models.DateTimeField(auto_now=True)
 
-    cars = models.ManyToManyField('cars.Car', related_name='features')
+    cars = models.ManyToManyField('cars.Car', related_name='features', through='CarFeature')
+
+    def __str__(self):
+        return self.name
+    
+class CarFeature(TimestampMixin):
+    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='car_features')
+    feature = models.ForeignKey('cars.Feature', on_delete=models.CASCADE, related_name='car_features')
+
+class Source(TimestampMixin):
+    name = models.TextField()
 
     def __str__(self):
         return self.name
 
-class Source(models.Model):
-    name = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True) 
-    modified_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-
-class InspectionReport(models.Model):
+class InspectionReport(TimestampMixin):
     inspected_date = models.DateField(null=True, blank=True)
     overall_rating = models.TextField(null=True, blank=True)
     grade = models.TextField(null=True, blank=True)
@@ -45,20 +42,16 @@ class InspectionReport(models.Model):
     suspension_steering = models.TextField(null=True, blank=True)
     interior = models.TextField(null=True, blank=True)
     ac_heater = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True) 
-    modified_at = models.DateTimeField(auto_now=True)
 
-    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE)
-    source = models.ForeignKey('cars.Source', on_delete=models.CASCADE)
+    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='inspection_reports')
+    source = models.ForeignKey('cars.Source', on_delete=models.CASCADE, related_name='inspection_reports')
 
     def __str__(self):
         return (f"{self.inspected_date}, {self.overall_rating}, {self.grade}")
 
-class Image(models.Model):
+class Image(TimestampMixin):
     external_image_url = models.URLField(blank=True, null=True)
     uploaded_image = models.ImageField(upload_to='car_images/', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True) 
-    modified_at = models.DateTimeField(auto_now=True)
 
     car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='images')
 

@@ -1,12 +1,15 @@
-import json
 from datetime import datetime
+import json
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 
 from ads.models import Ad
+from ads.constants import DEFAULT_UNKNOWN_VALUE
 from cars.models import Car, Feature, Image, Source, InspectionReport
 
+
+User = get_user_model()
 
 class Command(BaseCommand):
     help = 'Populate the database from a JSON file'
@@ -26,14 +29,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Successfully populated the database'))
 
     def create_or_get_user(self):
-        user, created = get_user_model().objects.get_or_create(username='pakwheels')
+        user, created = User.objects.get_or_create(username='pakwheels')
 
-        if created:
-            user.set_password('pakwheels_password')
-            user.save()
-        else:
-            user.set_password('pakwheels_password')
-            user.save(update_fields=['password'])
+        user.set_password('pakwheels_password')
+        user.save(update_fields=['password'] if not created else None)
 
         return user
 
@@ -41,29 +40,20 @@ class Command(BaseCommand):
         return Ad.objects.create(
             user=user,
             title=ad_entry['title'],
-            price=self.parse_price(ad_entry.get('price', '')),
+            price=float(ad_entry.get('price', '').replace('PKR ', '') or '0'),
             location=ad_entry['location'],
-            seller_comments=', '.join(ad_entry.get('seller_comments', []))
+            seller_comments = '\n'.join(ad_entry.get('seller_comments', []))
         )
-
-    def parse_price(self, price_value):
-        return float(price_value.replace('PKR ', '').replace(',', '') or '0')
-
+    
     def create_car(self, ad, ad_entry):
         return Car.objects.create(
             ad=ad,
-            registered_in=ad_entry['car_details'].get('Registered In', 'Unknown'),
-            color=ad_entry['car_details'].get('Color', 'Unknown'),
-            assembly=ad_entry['car_details'].get('Assembly', 'Unknown'),
-            engine_capacity=self.parse_engine_capacity(ad_entry['car_details'].get('Engine Capacity', '0')),
-            body_type=ad_entry['car_details'].get('Body Type', 'Unknown')
+            registered_in=ad_entry['car_details'].get('Registered In', DEFAULT_UNKNOWN_VALUE),
+            color=ad_entry['car_details'].get('Color', DEFAULT_UNKNOWN_VALUE),
+            assembly=ad_entry['car_details'].get('Assembly', DEFAULT_UNKNOWN_VALUE),
+            engine_capacity=int(ad_entry['car_details'].get('Engine Capacity', '0').replace(' cc', '') or 0),
+            body_type=ad_entry['car_details'].get('Body Type', DEFAULT_UNKNOWN_VALUE)
         )
-    
-    def parse_date(self, date_str):
-        return datetime.strptime(date_str, '%m/%d/%y') if date_str else None
-
-    def parse_engine_capacity(self, engine_capacity):
-        return int(engine_capacity.replace(' cc', '') or 0)
 
     def add_features_to_car(self, car, feature_names):
         feature_instances = [
@@ -77,8 +67,8 @@ class Command(BaseCommand):
         image_instances = [Image(car=car, external_image_url=image_url) for image_url in image_urls]
         Image.objects.bulk_create(image_instances)
 
-    def create_inspection_report(self, car, inspection_data):
-        if not (inspection_data and any(inspection_data.values())):
+    def create_inspection_report(self, car, report_details):
+        if not (report_details and any(report_details.values())):
             self.stdout.write(self.style.WARNING(f'No valid inspection report data for Car: {car}'))
             return
 
@@ -87,14 +77,14 @@ class Command(BaseCommand):
         inspection_report = InspectionReport.objects.create(
             car=car,
             source=source,
-            inspected_date=self.parse_date(inspection_data.get('Inspected Date', None)),
-            overall_rating=inspection_data.get('Overall Rating', None),
-            grade=inspection_data.get('Grade', None),
-            exterior_body=inspection_data.get('Exterior & Body', None),
-            engine_transmission_clutch=inspection_data.get('Engine/Transmission/Clutch', None),
-            suspension_steering=inspection_data.get('Suspension/Steering', None),
-            interior=inspection_data.get('Interior', None),
-            ac_heater=inspection_data.get('AC/Heater', None)
+            inspected_date=datetime.strptime(report_details.get('Inspected Date', None), '%m/%d/%y'),
+            overall_rating=report_details.get('Overall Rating', None),
+            grade=report_details.get('Grade', None),
+            exterior_body=report_details.get('Exterior & Body', None),
+            engine_transmission_clutch=report_details.get('Engine/Transmission/Clutch', None),
+            suspension_steering=report_details.get('Suspension/Steering', None),
+            interior=report_details.get('Interior', None),
+            ac_heater=report_details.get('AC/Heater', None)
         )
 
         self.stdout.write(self.style.SUCCESS(f'Successfully created InspectionReport: {inspection_report}'))
