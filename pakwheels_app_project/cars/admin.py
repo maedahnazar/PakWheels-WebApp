@@ -64,8 +64,8 @@ class InspectionReportAdmin(admin.ModelAdmin):
     car_id_display.short_description = 'Car ID'
 
     def source_id_display(self, obj):
-        return obj.source.id if obj.source else None
-    
+        return getattr(obj.source, 'id', None) if hasattr(obj, 'source') else None
+
     source_id_display.short_description = 'Source ID'
 
 @admin.register(Source)

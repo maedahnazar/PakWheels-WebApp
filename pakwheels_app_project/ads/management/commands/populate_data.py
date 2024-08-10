@@ -40,7 +40,10 @@ class Command(BaseCommand):
         return Ad.objects.create(
             user=user,
             title=ad_entry['title'],
-            price=float(ad_entry.get('price', '').replace('PKR ', '') or '0'),
+            price = float(
+                ad_entry.get('price', '').replace('PKR ', '') 
+                if ad_entry.get('price', '').replace('PKR ', '').isdigit() else '0'
+            ),
             location=ad_entry['location'],
             seller_comments = '\n'.join(ad_entry.get('seller_comments', []))
         )
@@ -60,7 +63,6 @@ class Command(BaseCommand):
             Feature.objects.get_or_create(name=feature_name.strip())[0]
             for feature_name in feature_names
         ]
-        
         car.features.set(feature_instances)
 
     def add_images_to_car(self, car, image_urls):

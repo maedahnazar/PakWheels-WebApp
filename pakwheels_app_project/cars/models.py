@@ -18,14 +18,17 @@ class Car(TimestampMixin):
 class Feature(TimestampMixin):
     name = models.TextField()
 
-    cars = models.ManyToManyField('cars.Car', related_name='features', through='CarFeature')
+    cars = models.ManyToManyField('cars.Car', related_name='features', through='CarFeatureThrough')
 
     def __str__(self):
         return self.name
     
-class CarFeature(TimestampMixin):
-    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='car_features')
-    feature = models.ForeignKey('cars.Feature', on_delete=models.CASCADE, related_name='car_features')
+class CarFeatureThrough(models.Model):
+    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE)
+    feature = models.ForeignKey('Feature', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.car} - {self.feature.name}"
 
 class Source(TimestampMixin):
     name = models.TextField()

@@ -55,17 +55,12 @@ THIRD_PARTY_APPS = [
     'django_extensions',
 ]
 
-
 CUSTOM_APPS = [
     'users',
     'ads',
     'cars',
     'core',
 ]
-
-
-
-
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + CUSTOM_APPS
 

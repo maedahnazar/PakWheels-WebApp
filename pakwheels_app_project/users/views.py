@@ -16,6 +16,7 @@ def user_signup(request):
             form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
+
             return redirect('login')
         
     else:
@@ -40,6 +41,7 @@ def user_login(request):
             if user:
                 login(request, user)
                 messages.info(request, f'You are now logged in as {username}.')
+                
                 return redirect('home')
             
             else:
