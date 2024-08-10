@@ -36,7 +36,6 @@ class AdAdmin(admin.ModelAdmin):
     list_display = ('title', 'price', 'location', 'car_id_display', 'created_at', 'modified_at')
     list_filter = (PriceRangeFilter, 'location')  # Add custom filter here
 
-
     def car_id_display(self, obj):
         return obj.car.id if obj.car else None
     

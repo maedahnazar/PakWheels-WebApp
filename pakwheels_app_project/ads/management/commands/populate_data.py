@@ -79,7 +79,8 @@ class Command(BaseCommand):
         inspection_report = InspectionReport.objects.create(
             car=car,
             source=source,
-            inspected_date=datetime.strptime(report_details.get('Inspected Date', None), '%m/%d/%y'),
+            inspected_date = datetime.strptime(report_details.get('Inspected Date', ''), '%m/%d/%y') 
+                            if report_details.get('Inspected Date', '') else None,
             overall_rating=report_details.get('Overall Rating', None),
             grade=report_details.get('Grade', None),
             exterior_body=report_details.get('Exterior & Body', None),
