@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.utils.html import format_html
 
 from ads.models import Ad
 
@@ -13,4 +12,3 @@ class AdAdmin(admin.ModelAdmin):
         return obj.car.id if obj.car else None
     
     car_id_display.short_description = 'Car ID'
-    
