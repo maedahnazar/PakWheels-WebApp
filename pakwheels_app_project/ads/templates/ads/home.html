@@ -1,0 +1,91 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .ad-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .ad-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: calc(33.333% - 40px);
+        box-sizing: border-box;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ad-card h2 {
+        font-size: 1.5em;
+        margin: 0;
+    }
+
+    .ad-card p {
+        font-size: 1em;
+        margin: 10px 0;
+    }
+
+    .ad-info {
+        flex: 1;
+    }
+
+    .ad-image {
+        width: 150px;
+        height: auto;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    @media (max-width: 768px) {
+        .ad-card {
+            width: calc(50% - 40px);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .ad-card {
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .ad-image {
+            margin-top: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="get">
+    <input type="text" name="location" placeholder="Filter by location" value="{{ request.GET.location }}">
+    <input type="number" name="min_price" placeholder="Min Price" value="{{ request.GET.min_price }}">
+    <input type="number" name="max_price" placeholder="Max Price" value="{{ request.GET.max_price }}">
+    <button type="submit">Filter</button>
+</form>
+
+<div class="ad-cards">
+    {% for ad in ads %}
+        <a href="{% url 'ad_detail' ad.id %}" class="ad-card">
+            <div class="ad-info">
+                <h2>{{ ad.title }}</h2>
+                <p>Price: {{ ad.price }} lacs</p>
+                <p>Location: {{ ad.location }}</p>
+            </div>
+            {% if ad.car.images.exists %}
+                <img src="{{ ad.car.images.first.external_image_url }}" alt="{{ ad.title }}" class="ad-image">
+            {% endif %}
+        </a>
+    {% endfor %}
+</div>
+{% endblock %}
