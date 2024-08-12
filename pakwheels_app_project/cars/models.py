@@ -54,7 +54,7 @@ class InspectionReport(TimestampMixin):
 
 class Image(TimestampMixin):
     external_image_url = models.URLField(blank=True, null=True)
-    uploaded_image = models.ImageField(upload_to='car_images/', blank=True, null=True)
+    uploaded_image = models.ImageField(upload_to='images/', blank=True, null=True)
 
     car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='images')
 

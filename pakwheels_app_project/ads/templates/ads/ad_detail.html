@@ -93,7 +93,11 @@
                 <div class="slides">
                     {% for image in ad.car.images.all %}
                         <div class="slide">
-                            <img src="{{ image.external_image_url }}" alt="{{ ad.title }}">
+                            {% if image.external_image_url %}
+                                <img src="{{ image.external_image_url }}" alt="{{ ad.title }}">
+                            {% elif image.uploaded_image %}
+                                <img src="{{ image.uploaded_image.url }}" alt="{{ ad.title }}">
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>

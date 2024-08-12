@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from cars.models import Car, Feature, InspectionReport, Source
+from cars.models import Car, Feature, InspectionReport, Source, Image
 
 
 @admin.register(Car)
@@ -71,3 +71,12 @@ class InspectionReportAdmin(admin.ModelAdmin):
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'created_at', 'modified_at')
+
+@admin.register(Image)
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'external_image_url', 'uploaded_image', 'car_id_display', 'created_at', 'modified_at')
+
+    def car_id_display(self, obj):
+        return obj.car.id if obj.car else None
+    
+    car_id_display.short_description = 'Car ID'

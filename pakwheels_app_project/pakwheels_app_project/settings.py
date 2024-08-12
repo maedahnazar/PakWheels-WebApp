@@ -34,10 +34,8 @@ AUTH_USER_MODEL = 'users.User'
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 
-
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Application definition
 # settings.py
@@ -64,6 +62,8 @@ CUSTOM_APPS = [
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + CUSTOM_APPS
 
+LOGIN_URL = '/user_login/' 
+LOGIN_REDIRECT_URL = 'add_car'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
