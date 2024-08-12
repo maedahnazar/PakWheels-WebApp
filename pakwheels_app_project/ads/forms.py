@@ -30,13 +30,14 @@ class MultipleFileField(forms.FileField):
         super().__init__(*args, **kwargs)
 
     def clean(self, uploaded_files, initial=None):
-        if isinstance(uploaded_files, (list, tuple)):
-            result = [super().clean(file, initial) for file in uploaded_files]
-        else:
-            result = [super().clean(uploaded_files, initial)]
-            
-        return result
+        single_file_clean = super().clean
 
+        if isinstance(uploaded_files, (list, tuple)):
+            result = [single_file_clean(file, initial) for file in uploaded_files]
+        else:
+            result = [single_file_clean(uploaded_files, initial)]
+
+        return result
 
 class ImageForm(forms.Form):
     uploaded_images = MultipleFileField()
@@ -46,11 +47,13 @@ class InspectionReportForm(forms.ModelForm):
 
     class Meta:
         model = InspectionReport
+
         fields = [
             'inspected_date', 'overall_rating', 'grade', 'exterior_body', 
             'engine_transmission_clutch', 'suspension_steering', 
             'interior', 'ac_heater', 'source'
         ]
+        
         widgets = {
             'inspected_date': forms.DateInput(attrs={'type': 'date'}),
             'overall_rating': forms.NumberInput(attrs={'step': 0.1}),
@@ -62,3 +65,11 @@ class InspectionReportForm(forms.ModelForm):
             'ac_heater': forms.TextInput(),
             'source': forms.Select(),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('source'):
+            pakwheels_source = Source.objects.get_or_create(name="PakWheels")[0]
+            cleaned_data['source'] = pakwheels_source
+
+        return cleaned_data
