@@ -53,7 +53,7 @@ class InspectionReportForm(forms.ModelForm):
             'engine_transmission_clutch', 'suspension_steering', 
             'interior', 'ac_heater', 'source'
         ]
-        
+
         widgets = {
             'inspected_date': forms.DateInput(attrs={'type': 'date'}),
             'overall_rating': forms.NumberInput(attrs={'step': 0.1}),
@@ -69,7 +69,7 @@ class InspectionReportForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if not cleaned_data.get('source'):
-            pakwheels_source = Source.objects.get_or_create(name="PakWheels")[0]
+            pakwheels_source = Source.objects.get_or_create(name="Pak Wheels")[0]
             cleaned_data['source'] = pakwheels_source
 
         return cleaned_data
