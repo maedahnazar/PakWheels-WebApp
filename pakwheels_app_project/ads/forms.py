@@ -34,6 +34,7 @@ class MultipleFileField(forms.FileField):
             result = [super().clean(file, initial) for file in uploaded_files]
         else:
             result = [super().clean(uploaded_files, initial)]
+            
         return result
 
 
