@@ -84,9 +84,14 @@
                 <p>Location: {{ ad.location }}</p>
             </div>
             {% if ad.car.images.exists %}
-                <img src="{{ ad.car.images.first.external_image_url }}" alt="{{ ad.title }}" class="ad-image">
+                {% if ad.car.images.first.external_image_url %}
+                    <img src="{{ ad.car.images.first.external_image_url }}" alt="{{ ad.title }}" class="ad-image">
+                {% elif ad.car.images.first.uploaded_image %}
+                    <img src="{{ ad.car.images.first.uploaded_image.url }}" alt="{{ ad.title }}" class="ad-image">
+                {% endif %}
             {% endif %}
         </a>
     {% endfor %}
 </div>
+
 {% endblock %}

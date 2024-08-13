@@ -7,6 +7,7 @@ from django.contrib import messages
 from .forms import AdForm, CarForm, ImageForm, InspectionReportForm
 from ads.models import Ad
 from cars.models import Image, Car
+from cars.services import CarService
 
 
 @require_http_methods(["GET"])
@@ -25,7 +26,7 @@ def home(request):
     if request.GET.get('max_price'):
         ads = ads.filter(price__lte=request.GET.get('max_price'))
 
-    return render(request, 'ads/home.html', {'ads': ads})
+    return render(request, 'ads/home.html', {'ads': ads[:20]})
 
 @require_http_methods(["GET"])
 def ad_detail(request, ad_id):
@@ -40,31 +41,17 @@ def add_car(request):
         image_form = ImageForm(request.POST, request.FILES)
         inspection_report_form = InspectionReportForm(request.POST)
 
-        if(
-            ad_form.is_valid() and 
-            car_form.is_valid() and 
-            image_form.is_valid() and 
-            inspection_report_form.is_valid()
-        ):
+        if all([ad_form.is_valid(), car_form.is_valid(), image_form.is_valid(), inspection_report_form.is_valid()]):
             ad = ad_form.save(commit=False)
-            ad.user = request.user
-            ad.save()
-
-            car = car_form.save(commit=False)
-            car.ad = ad
-            car.save()
-
-            car_form.save_m2m()
-
-            for image in image_form.cleaned_data['uploaded_images']:
-                Image.objects.create(car=car, uploaded_image=image)
-
-            inspection_report = inspection_report_form.save(commit=False)
-            if inspection_report:
-                inspection_report.car = car
-                inspection_report.save()
-
+            CarService.save_ad_with_related(
+                ad=ad,
+                car_form=car_form,
+                image_form=image_form,
+                inspection_report_form=inspection_report_form,
+                user=request.user
+            )
             return redirect('home')
+
     else:
         ad_form = AdForm()
         car_form = CarForm()

@@ -41,15 +41,26 @@
             width: 100%;
             bottom: 0;
         }
+
+        form {
+            display: inline;
+        }
     </style>
     {% block extra_styles %}{% endblock %}
 </head>
 <body>
     <header>
         <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'signup' %}">Signup</a>
-        <a href="{% url 'add_car' %}">Sale your car</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'add_car' %}">Sell Your Car</a>
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" style="background:none; border:none; color:#fff; cursor:pointer; margin-left:10px;">Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'signup' %}">Signup</a>
+        {% endif %}
     </header>
 
     <div class="container">
