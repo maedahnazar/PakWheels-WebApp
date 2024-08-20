@@ -2,7 +2,6 @@ from cars.models import Car, Image, InspectionReport
 
 
 class CarService:
-    @staticmethod
     def save_ad_with_related(ad, car_form, image_form, inspection_report_form, user):
         ad.user = user
         ad.save()

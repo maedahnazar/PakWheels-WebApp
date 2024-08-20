@@ -1,5 +1,6 @@
 from django.urls import path
 
+from users.views import user_signup, user_login
 from users.views import user_signup, user_login, user_logout
 
 
