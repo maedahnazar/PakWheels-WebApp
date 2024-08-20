@@ -113,11 +113,16 @@
         <p><strong>Body Type:</strong> {{ ad.car.body_type }}</p>
 
         <h2>Car Features</h2>
+        {% if car.features.all%}
         <ul>
-            {% for feature in ad.car.features.all %}
+            {% for feature in car.features.all%}
                 <li>{{ feature.name }}</li>
             {% endfor %}
         </ul>
+
+        {% else %}
+        <p>No car features available for this ad.</p>
+        {% endif %}
     {% else %}
         <p>No car details available for this ad.</p>
     {% endif %}

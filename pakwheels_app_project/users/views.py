@@ -25,7 +25,6 @@ def user_signup(request):
 
     return render(request, 'users/signup.html', {'form': form})
 
-
 @require_http_methods(["GET", "POST"])
 def user_login(request):
     if request.method == 'POST':

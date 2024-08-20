@@ -11,6 +11,11 @@ class CarService:
         car.save()
         car_form.save_m2m()
 
+        features = car_form.cleaned_data.get('features')
+        if features:
+            for feature in features:
+                car.features.add(feature)
+
         images_to_create = [
                 Image(car=car, uploaded_image=image)
                 for image in image_form.cleaned_data['uploaded_images']
