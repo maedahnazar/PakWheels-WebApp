@@ -1,13 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
-from django.forms import modelformset_factory
 from django.contrib import messages
 
-from .forms import AdForm, CarForm, ImageForm, InspectionReportForm
+from ads.forms import AdForm, CarForm, ImageForm, InspectionReportForm
 from ads.models import Ad
 from cars.models import Image, Car
-from cars.services import CarService
 
 
 @require_http_methods(["GET"])
@@ -26,7 +24,7 @@ def home(request):
     if request.GET.get('max_price'):
         ads = ads.filter(price__lte=request.GET.get('max_price'))
 
-    return render(request, 'ads/home.html', {'ads': ads[:20]})
+    return render(request, 'ads/home.html', {'ads': ads})
 
 @require_http_methods(["GET"])
 def ad_detail(request, ad_id):
@@ -42,9 +40,9 @@ def add_car(request):
         inspection_report_form = InspectionReportForm(request.POST)
 
         if all([ad_form.is_valid(), car_form.is_valid(), image_form.is_valid(), inspection_report_form.is_valid()]):
-            ad = ad_form.save(commit=False)
-            CarService.save_ad_with_related(
-                ad=ad,
+            car = car_form.save(commit=False)  
+            car.save_related_entities(
+                ad=ad_form.save(commit=False),
                 car_form=car_form,
                 image_form=image_form,
                 inspection_report_form=inspection_report_form,

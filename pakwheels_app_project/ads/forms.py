@@ -68,7 +68,7 @@ class InspectionReportForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if not cleaned_data.get('source'):
-            pakwheels_source = Source.objects.get_or_create(name="Pak Wheels")[0]
+            pakwheels_source, _ = Source.objects.get_or_create(name="Pak Wheels")
             cleaned_data['source'] = pakwheels_source
 
         return cleaned_data
