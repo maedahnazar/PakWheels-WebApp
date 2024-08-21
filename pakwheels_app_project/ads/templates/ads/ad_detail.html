@@ -93,7 +93,11 @@
                 <div class="slides">
                     {% for image in ad.car.images.all %}
                         <div class="slide">
-                            <img src="{{ image.external_image_url }}" alt="{{ ad.title }}">
+                            {% if image.external_image_url %}
+                                <img src="{{ image.external_image_url }}" alt="{{ ad.title }}">
+                            {% elif image.uploaded_image %}
+                                <img src="{{ image.uploaded_image.url }}" alt="{{ ad.title }}">
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
@@ -109,29 +113,32 @@
         <p><strong>Body Type:</strong> {{ ad.car.body_type }}</p>
 
         <h2>Car Features</h2>
+        {% if car.features.all%}
         <ul>
-            {% for feature in ad.car.features.all %}
+            {% for feature in car.features.all%}
                 <li>{{ feature.name }}</li>
             {% endfor %}
         </ul>
+
+        {% else %}
+        <p>No car features available for this ad.</p>
+        {% endif %}
     {% else %}
         <p>No car details available for this ad.</p>
     {% endif %}
 
     <h2>Inspection Report</h2>
-    {% if ad.inspectionreport_set.exists %}
-        {% for report in ad.inspectionreport_set.all %}
-            <p><strong>Inspected Date:</strong> {{ report.inspected_date }}</p>
-            <p><strong>Overall Rating:</strong> {{ report.overall_rating }}</p>
-            <p><strong>Grade:</strong> {{ report.grade }}</p>
-            <p><strong>Exterior & Body:</strong> {{ report.exterior_body }}</p>
-            <p><strong>Engine/Transmission/Clutch:</strong> {{ report.engine_transmission_clutch }}</p>
-            <p><strong>Suspension/Steering:</strong> {{ report.suspension_steering }}</p>
-            <p><strong>Interior:</strong> {{ report.interior }}</p>
-            <p><strong>AC/Heater:</strong> {{ report.ac_heater }}</p>
-        {% endfor %}
+    {% if car.inspection_reports.first %}
+        <p><strong>Inspected Date:</strong> {{ car.inspection_reports.first.inspected_date }}</p>
+        <p><strong>Overall Rating:</strong> {{ car.inspection_reports.first.overall_rating }}</p>
+        <p><strong>Grade:</strong> {{ car.inspection_reports.first.grade }}</p>
+        <p><strong>Exterior & Body:</strong> {{ car.inspection_reports.first.exterior_body }}</p>
+        <p><strong>Engine/Transmission/Clutch:</strong> {{ car.inspection_reports.first.engine_transmission_clutch }}</p>
+        <p><strong>Suspension/Steering:</strong> {{ car.inspection_reports.first.suspension_steering }}</p>
+        <p><strong>Interior:</strong> {{ car.inspection_reports.first.interior }}</p>
+        <p><strong>AC/Heater:</strong> {{ car.inspection_reports.first.ac_heater }}</p>
     {% else %}
-        <p>No inspection report available for this ad.</p>
+        <p>No inspection report available for this car.</p>
     {% endif %}
 
     <p><strong>Price:</strong> {{ ad.price }} lacs</p>

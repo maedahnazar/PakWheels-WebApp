@@ -1,0 +1,75 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2>Sale Your Car</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        {{ ad_form.as_p }}
+    </div>
+    <div class="form-group">
+        {{ car_form.as_p }}
+    </div>
+
+    <h3>Upload Images</h3>
+    
+    <div id="image-upload-container" class="form-group">
+        {{ image_form.uploaded_images }}
+    </div>
+
+    <button 
+            id="toggle-inspection-report" type="button" class="btn btn-secondary" 
+            onclick="toggleInspectionReportForm()">Add Inspection Report
+    </button>
+
+    <div id="inspection-report-form" style="display: none;">
+        <h3>Inspection Report</h3>
+        {{ inspection_report_form.as_p }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+</form>
+
+<script>
+    function toggleInspectionReportForm() {
+        var form = document.getElementById('inspection-report-form');
+        var button = document.getElementById('toggle-inspection-report');
+        if (form.style.display === 'none') {
+            form.style.display = 'block';
+            button.style.display = 'none'; 
+        } else {
+            form.style.display = 'none';
+            button.style.display = 'block';
+        }
+    }
+</script>
+
+<style>
+  .form-group {
+      margin-bottom: 15px;
+      max-width: 600px; 
+      margin-left: auto;
+      margin-right: auto;
+  }
+  input[type="text"], input[type="number"], textarea, select {
+      width: 100%; 
+      max-width: 100%; 
+      padding: 8px; 
+      font-size: 14px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+  }
+  .image-upload-form {
+      margin-bottom: 10px;
+  }
+  .btn {
+      padding: 8px 12px; 
+      font-size: 14px;
+  }
+  .btn-secondary {
+      margin-top: 10px;
+  }
+</style>
+{% endblock %}
