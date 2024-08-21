@@ -24,7 +24,7 @@ def home(request):
     if request.GET.get('max_price'):
         ads = ads.filter(price__lte=request.GET.get('max_price'))
 
-    return render(request, 'ads/home.html', {'ads': ads})
+    return render(request, 'ads/home.html', {'ads': ads[:20]})
 
 @require_http_methods(["GET"])
 def ad_detail(request, ad_id):
@@ -40,9 +40,16 @@ def add_car(request):
         inspection_report_form = InspectionReportForm(request.POST)
 
         if all([ad_form.is_valid(), car_form.is_valid(), image_form.is_valid(), inspection_report_form.is_valid()]):
+            ad = ad_form.save(commit=False)
+            ad.user = request.user
+            ad.save()
+
             car = car_form.save(commit=False)  
+            car.ad = ad
+            car.save()
+
             car.save_related_entities(
-                ad=ad_form.save(commit=False),
+                ad=ad,
                 car_form=car_form,
                 image_form=image_form,
                 inspection_report_form=inspection_report_form,

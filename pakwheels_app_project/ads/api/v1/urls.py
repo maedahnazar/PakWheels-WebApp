@@ -1,6 +1,6 @@
 from django.urls import path
 
-from ads.views import home, ad_detail, add_car
+from ads.api.v1.views import home, ad_detail, add_car
 
 
 urlpatterns = [
