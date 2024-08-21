@@ -16,10 +16,10 @@ class Car(TimestampMixin):
 
     def save_related_entities(self, ad, car_form, image_form, inspection_report_form, user):
         ad.user = user
-        ad.save(update_fields=['user'])
+        ad.save()
 
         self.ad = ad
-        self.save(update_fields=['ad'])
+        self.save()
 
         car_form.save_m2m()  
         features = car_form.cleaned_data.get('features')
@@ -36,7 +36,7 @@ class Car(TimestampMixin):
         inspection_report = inspection_report_form.save(commit=False)
         if inspection_report:
             inspection_report.car = self
-            inspection_report.save(update_fields=['car'])
+            inspection_report.save()
 
 class Feature(TimestampMixin):
     name = models.TextField()
