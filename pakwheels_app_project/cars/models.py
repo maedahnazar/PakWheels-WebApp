@@ -1,6 +1,5 @@
 from django.db import models
-
-from core.mixins import TimestampMixin  
+from core.mixins import TimestampMixin
 
 
 class Car(TimestampMixin):
@@ -15,6 +14,30 @@ class Car(TimestampMixin):
     def __str__(self):
         return f"{self.id} - {self.body_type} | {self.engine_capacity}cc"
 
+    def save_related_entities(self, ad, car_form, image_form, inspection_report_form, user):
+        ad.user = user
+        ad.save(update_fields=['user'])
+
+        self.ad = ad
+        self.save(update_fields=['ad'])
+
+        car_form.save_m2m()  
+        features = car_form.cleaned_data.get('features')
+        if features:
+            for feature in features:
+                self.features.add(feature)
+
+        images_to_create = [
+            Image(car=self, uploaded_image=image)
+            for image in image_form.cleaned_data['uploaded_images']
+        ]
+        Image.objects.bulk_create(images_to_create)
+
+        inspection_report = inspection_report_form.save(commit=False)
+        if inspection_report:
+            inspection_report.car = self
+            inspection_report.save(update_fields=['car'])
+
 class Feature(TimestampMixin):
     name = models.TextField()
 
@@ -22,7 +45,8 @@ class Feature(TimestampMixin):
 
     def __str__(self):
         return self.name
-    
+
+
 class CarFeatureThrough(models.Model):
     car = models.ForeignKey('cars.Car', on_delete=models.CASCADE)
     feature = models.ForeignKey('Feature', on_delete=models.CASCADE)
@@ -30,11 +54,13 @@ class CarFeatureThrough(models.Model):
     def __str__(self):
         return f"{self.car} - {self.feature.name}"
 
+
 class Source(TimestampMixin):
     name = models.TextField()
 
     def __str__(self):
         return self.name
+
 
 class InspectionReport(TimestampMixin):
     inspected_date = models.DateField(null=True, blank=True)
@@ -52,9 +78,10 @@ class InspectionReport(TimestampMixin):
     def __str__(self):
         return (f"{self.inspected_date}, {self.overall_rating}, {self.grade}")
 
+
 class Image(TimestampMixin):
     external_image_url = models.URLField(blank=True, null=True)
-    uploaded_image = models.ImageField(upload_to='car_images/', blank=True, null=True)
+    uploaded_image = models.ImageField(upload_to='images/', blank=True, null=True)
 
     car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='images')
 

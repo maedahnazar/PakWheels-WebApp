@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
+from django.contrib.auth import logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
@@ -23,7 +24,6 @@ def user_signup(request):
         form = UserRegisterForm()
 
     return render(request, 'users/signup.html', {'form': form})
-
 
 @require_http_methods(["GET", "POST"])
 def user_login(request):
@@ -55,3 +55,9 @@ def user_login(request):
         form = AuthenticationForm()
         
     return render(request, 'users/login.html', {'form': form})
+
+@require_http_methods(["POST"])
+def user_logout(request):
+    logout(request)
+    messages.info(request, "You have successfully logged out.")
+    return redirect('home')

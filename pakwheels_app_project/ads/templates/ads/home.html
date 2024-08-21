@@ -68,6 +68,7 @@
 
 {% block content %}
 <form method="get">
+    <input type="text" name="title" placeholder="Filter by title" value="{{ request.GET.title }}">
     <input type="text" name="location" placeholder="Filter by location" value="{{ request.GET.location }}">
     <input type="number" name="min_price" placeholder="Min Price" value="{{ request.GET.min_price }}">
     <input type="number" name="max_price" placeholder="Max Price" value="{{ request.GET.max_price }}">
@@ -83,9 +84,14 @@
                 <p>Location: {{ ad.location }}</p>
             </div>
             {% if ad.car.images.exists %}
-                <img src="{{ ad.car.images.first.external_image_url }}" alt="{{ ad.title }}" class="ad-image">
+                {% if ad.car.images.first.external_image_url %}
+                    <img src="{{ ad.car.images.first.external_image_url }}" alt="{{ ad.title }}" class="ad-image">
+                {% elif ad.car.images.first.uploaded_image %}
+                    <img src="{{ ad.car.images.first.uploaded_image.url }}" alt="{{ ad.title }}" class="ad-image">
+                {% endif %}
             {% endif %}
         </a>
     {% endfor %}
 </div>
+
 {% endblock %}
