@@ -1,4 +1,5 @@
 from django.db import models
+
 from core.mixins import TimestampMixin
 
 
@@ -21,22 +22,23 @@ class Car(TimestampMixin):
         self.ad = ad
         self.save()
 
-        car_form.save_m2m()  
+        car_form.save_m2m()
+
         features = car_form.cleaned_data.get('features')
         if features:
             for feature in features:
                 self.features.add(feature)
 
-        images_to_create = [
-            Image(car=self, uploaded_image=image)
-            for image in image_form.cleaned_data['uploaded_images']
-        ]
-        Image.objects.bulk_create(images_to_create)
+        images = image_form.cleaned_data.get('uploaded_images', [])
+        if images:
+            images_to_create = [Image(car=self, uploaded_image=image) for image in images]
+            Image.objects.bulk_create(images_to_create)
 
         inspection_report = inspection_report_form.save(commit=False)
         if inspection_report:
             inspection_report.car = self
             inspection_report.save()
+
 
 class Feature(TimestampMixin):
     name = models.TextField()
