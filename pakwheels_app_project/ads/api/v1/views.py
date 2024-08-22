@@ -9,20 +9,19 @@ from cars.models import Image, Car
 
 
 @require_http_methods(["GET"])
-def home(request):
+def ad_list(request):
     ads = Ad.objects.all()
 
-    if request.GET.get('title'):
-        ads = ads.filter(title__icontains=request.GET.get('title'))
+    filters = {
+    'title__icontains': request.GET.get('title'),
+    'location__icontains': request.GET.get('location'),
+    'price__gte': request.GET.get('min_price'),
+    'price__lte': request.GET.get('max_price'),
+    }
 
-    if request.GET.get('location'):
-        ads = ads.filter(location__icontains=request.GET.get('location'))
-
-    if request.GET.get('min_price'):
-        ads = ads.filter(price__gte=request.GET.get('min_price'))
-
-    if request.GET.get('max_price'):
-        ads = ads.filter(price__lte=request.GET.get('max_price'))
+    for filter_key, filter_value in filters.items():
+        if filter_value:
+            ads = ads.filter(**{filter_key: filter_value})
 
     return render(request, 'ads/home.html', {'ads': ads[:20]})
 
@@ -32,7 +31,7 @@ def ad_detail(request, ad_id):
     return render(request, 'ads/ad_detail.html', {'ad': ad, 'car': getattr(ad, 'car', None)})
 
 @login_required
-def add_car(request):
+def create_car(request):
     if request.method == 'POST':
         ad_form = AdForm(request.POST)
         car_form = CarForm(request.POST)
@@ -44,18 +43,16 @@ def add_car(request):
             ad.user = request.user
             ad.save()
 
-            car = car_form.save(commit=False)  
+            car = car_form.save(commit=False)
             car.ad = ad
             car.save()
 
             car.save_related_entities(
-                ad=ad,
                 car_form=car_form,
                 image_form=image_form,
-                inspection_report_form=inspection_report_form,
-                user=request.user
+                inspection_report_form=inspection_report_form
             )
-            return redirect('home')
+            return redirect('ad_list')
 
     else:
         ad_form = AdForm()

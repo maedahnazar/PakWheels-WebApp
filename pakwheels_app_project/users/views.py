@@ -42,7 +42,7 @@ def user_login(request):
                 login(request, user)
                 messages.info(request, f'You are now logged in as {username}.')
                 
-                return redirect('home')
+                return redirect('ad_list')
             
             else:
                 messages.error(request, 'Invalid username or password.')
@@ -60,4 +60,5 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
-    return redirect('home')
+    
+    return redirect('ad_list')
