@@ -17,7 +17,9 @@ class UserSignupView(View):
         if form.is_valid():
             form.save()
             form.cleaned_data.get('username')
+            
             return redirect('ad_list')
+        
         return render(request, 'users/signup.html', {'form': form})
 
 
@@ -35,14 +37,17 @@ class UserLoginView(View):
                 username=username,
                 password=form.cleaned_data.get('password')
             )
+
             if user:
                 login(request, user)
-                return redirect('ad_list')
+                return redirect('ad_list') 
             else:
                 messages.error(request, 'Invalid username or password.')
+
         else:
             for error in form.non_field_errors():
                 messages.error(request, error)
+
         return render(request, 'users/login.html', {'form': form})
 
 
@@ -50,4 +55,5 @@ class UserLogoutView(View):
     def post(self, request):
         logout(request)
         messages.info(request, "You have successfully logged out.")
+
         return redirect('ad_list')
