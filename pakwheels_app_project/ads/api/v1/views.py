@@ -52,6 +52,7 @@ def create_car(request):
                 image_form=image_form,
                 inspection_report_form=inspection_report_form
             )
+            
             return redirect('ad_list')
 
     else:
