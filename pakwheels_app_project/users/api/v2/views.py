@@ -16,11 +16,11 @@ class SignupView(View):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            form.cleaned_data.get('username')
+            response = redirect('ad_list')
+        else:
+            response = render(request, 'users/signup.html', {'form': form})
 
-            return redirect('ad_list')
-        
-        return render(request, 'users/signup.html', {'form': form})
+        return response
 
 
 class LoginView(View):
@@ -40,15 +40,17 @@ class LoginView(View):
 
             if user:
                 login(request, user)
-                return redirect('ad_list') 
+                response = redirect('ad_list')
             else:
                 messages.error(request, 'Invalid username or password.')
-
+                response = render(request, 'users/login.html', {'form': form})
+                
         else:
             for error in form.non_field_errors():
                 messages.error(request, error)
+            response = render(request, 'users/login.html', {'form': form})
 
-        return render(request, 'users/login.html', {'form': form})
+        return response
 
 
 class LogoutView(View):

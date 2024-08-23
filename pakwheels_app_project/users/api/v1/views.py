@@ -17,13 +17,14 @@ def signup_view(request):
             form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
-
-            return redirect('login')
-        
+            response = redirect('login')
+        else:
+            response = render(request, 'users/signup.html', {'form': form})
     else:
         form = UserRegisterForm()
+        response = render(request, 'users/signup.html', {'form': form})
 
-    return render(request, 'users/signup.html', {'form': form})
+    return response
 
 @require_http_methods(["GET", "POST"])
 def login_view(request):
@@ -31,29 +32,32 @@ def login_view(request):
         form = AuthenticationForm(request, data=request.POST)
 
         if form.is_valid():
-            username=form.cleaned_data.get('username')
+            username = form.cleaned_data.get('username')
             user = authenticate(
-                request, 
-                username=username, 
+                request,
+                username=username,
                 password=form.cleaned_data.get('password')
             )
 
             if user:
                 login(request, user)
                 messages.info(request, f'You are now logged in as {username}.')
-                
-                return redirect('ad_list')
+                response = redirect('ad_list')
             else:
                 messages.error(request, 'Invalid username or password.')
+                response = render(request, 'users/login.html', {'form': form})
 
         else:
             for error in form.non_field_errors():
                 messages.error(request, error)
+                
+            response = render(request, 'users/login.html', {'form': form})
 
     else:
         form = AuthenticationForm()
-        
-    return render(request, 'users/login.html', {'form': form})
+        response = render(request, 'users/login.html', {'form': form})
+
+    return response
 
 @require_http_methods(["POST"])
 def logout_view(request):

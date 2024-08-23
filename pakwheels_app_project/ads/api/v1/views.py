@@ -53,7 +53,15 @@ def car_create_view(request):
                 inspection_report_form=inspection_report_form
             )
 
-            return redirect('ad_list')
+            response = redirect('ad_list')
+            
+        else:
+            response = render(request, 'ads/add_car.html', {
+                'ad_form': ad_form,
+                'car_form': car_form,
+                'image_form': image_form,
+                'inspection_report_form': inspection_report_form,
+            })
 
     else:
         ad_form = AdForm()
@@ -61,9 +69,11 @@ def car_create_view(request):
         image_form = ImageForm()
         inspection_report_form = InspectionReportForm()
 
-    return render(request, 'ads/add_car.html', {
-        'ad_form': ad_form,
-        'car_form': car_form,
-        'image_form': image_form,
-        'inspection_report_form': inspection_report_form,
-    })
+        response = render(request, 'ads/add_car.html', {
+            'ad_form': ad_form,
+            'car_form': car_form,
+            'image_form': image_form,
+            'inspection_report_form': inspection_report_form,
+        })
+
+    return response

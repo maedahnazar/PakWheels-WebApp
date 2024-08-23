@@ -65,11 +65,14 @@ class CarCreateView(LoginRequiredMixin, View):
                 inspection_report_form=inspection_report_form
             )
 
-            return redirect('ad-list')
+            response = redirect('ad-list')
+            
+        else:
+            response = render(request, 'ads/add_car.html', {
+                'ad_form': ad_form,
+                'car_form': car_form,
+                'image_form': image_form,
+                'inspection_report_form': inspection_report_form,
+            })
 
-        return render(request, 'ads/add_car.html', {
-            'ad_form': ad_form,
-            'car_form': car_form,
-            'image_form': image_form,
-            'inspection_report_form': inspection_report_form,
-        })
+        return response
