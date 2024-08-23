@@ -9,7 +9,7 @@ from cars.models import Image, Car
 
 
 @require_http_methods(["GET"])
-def ad_list(request):
+def ad_list_view(request):
     ads = Ad.objects.all()
 
     filters = {
@@ -26,12 +26,12 @@ def ad_list(request):
     return render(request, 'ads/home.html', {'ads': ads[:20]})
 
 @require_http_methods(["GET"])
-def ad_detail(request, ad_id):
+def ad_detail_view(request, ad_id):
     ad = get_object_or_404(Ad, id=ad_id)
     return render(request, 'ads/ad_detail.html', {'ad': ad, 'car': getattr(ad, 'car', None)})
 
 @login_required
-def create_car(request):
+def car_create_view(request):
     if request.method == 'POST':
         ad_form = AdForm(request.POST)
         car_form = CarForm(request.POST)
@@ -52,7 +52,7 @@ def create_car(request):
                 image_form=image_form,
                 inspection_report_form=inspection_report_form
             )
-            
+
             return redirect('ad_list')
 
     else:

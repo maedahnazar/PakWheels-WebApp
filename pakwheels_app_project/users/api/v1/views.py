@@ -9,7 +9,7 @@ from users.forms import UserRegisterForm
 
 
 @require_http_methods(["GET", "POST"])
-def user_signup(request):
+def signup_view(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
 
@@ -26,7 +26,7 @@ def user_signup(request):
     return render(request, 'users/signup.html', {'form': form})
 
 @require_http_methods(["GET", "POST"])
-def user_login(request):
+def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
 
@@ -43,7 +43,6 @@ def user_login(request):
                 messages.info(request, f'You are now logged in as {username}.')
                 
                 return redirect('ad_list')
-            
             else:
                 messages.error(request, 'Invalid username or password.')
 
@@ -57,7 +56,8 @@ def user_login(request):
     return render(request, 'users/login.html', {'form': form})
 
 @require_http_methods(["POST"])
-def user_logout(request):
+def logout_view(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
+
     return redirect('ad_list')

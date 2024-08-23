@@ -30,7 +30,7 @@ class AdDetailView(View):
         ad = get_object_or_404(Ad, id=ad_id)
         return render(request, 'ads/ad_detail.html', {'ad': ad, 'car': getattr(ad, 'car', None)})
 
-class CreateCarView(LoginRequiredMixin, View):
+class CarCreateView(LoginRequiredMixin, View):
     def get(self, request):
         ad_form = AdForm()
         car_form = CarForm()

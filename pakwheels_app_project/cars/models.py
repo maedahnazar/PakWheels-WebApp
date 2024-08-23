@@ -14,9 +14,7 @@ class Car(TimestampMixin):
     def __str__(self):
         return f"{self.id} - {self.body_type} | {self.engine_capacity}cc"
 
-    def save_related_entities(self, car_form, image_form, inspection_report_form):
-        car_form.save_m2m()
-        
+    def save_related_entities(self, car_form, image_form, inspection_report_form):        
         features = car_form.cleaned_data.get('features')
         if features:
             for feature in features:

@@ -7,7 +7,7 @@ from django.views import View
 from users.forms import UserRegisterForm
 
 
-class UserSignupView(View):
+class SignupView(View):
     def get(self, request):
         form = UserRegisterForm()
         return render(request, 'users/signup.html', {'form': form})
@@ -17,13 +17,13 @@ class UserSignupView(View):
         if form.is_valid():
             form.save()
             form.cleaned_data.get('username')
-            
+
             return redirect('ad_list')
         
         return render(request, 'users/signup.html', {'form': form})
 
 
-class UserLoginView(View):
+class LoginView(View):
     def get(self, request):
         form = AuthenticationForm()
         return render(request, 'users/login.html', {'form': form})
@@ -51,7 +51,7 @@ class UserLoginView(View):
         return render(request, 'users/login.html', {'form': form})
 
 
-class UserLogoutView(View):
+class LogoutView(View):
     def post(self, request):
         logout(request)
         messages.info(request, "You have successfully logged out.")
