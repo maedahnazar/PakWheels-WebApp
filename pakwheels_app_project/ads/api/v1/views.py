@@ -8,22 +8,12 @@ from ads.models import Ad
 from cars.models import Image, Car
 
 
+from ads.filters import AdFilter
+
 @require_http_methods(["GET"])
 def ad_list_view(request):
-    ads = Ad.objects.all()
-
-    filters = {
-    'title__icontains': request.GET.get('title'),
-    'location__icontains': request.GET.get('location'),
-    'price__gte': request.GET.get('min_price'),
-    'price__lte': request.GET.get('max_price'),
-    }
-
-    for filter_key, filter_value in filters.items():
-        if filter_value:
-            ads = ads.filter(**{filter_key: filter_value})
-
-    return render(request, 'ads/home.html', {'ads': ads[:20]})
+    ad_filter = AdFilter(request.GET, queryset=Ad.objects.all())
+    return render(request, 'ads/home.html', {'ads': ad_filter.qs[:20], 'filter': ad_filter})
 
 @require_http_methods(["GET"])
 def ad_detail_view(request, ad_id):
@@ -54,7 +44,7 @@ def car_create_view(request):
             )
 
             response = redirect('ad_list')
-            
+
         else:
             response = render(request, 'ads/add_car.html', {
                 'ad_form': ad_form,
