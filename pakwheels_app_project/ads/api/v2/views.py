@@ -5,25 +5,14 @@ from django.contrib import messages
 
 from ads.forms import AdForm, CarForm, ImageForm, InspectionReportForm
 from ads.models import Ad
+from ads.filters import AdFilter
 from cars.models import Image, Car
 
 
 class AdListView(View):
     def get(self, request):
-        ads = Ad.objects.all()
-
-        filters = {
-            'title__icontains': request.GET.get('title'),
-            'location__icontains': request.GET.get('location'),
-            'price__gte': request.GET.get('min_price'),
-            'price__lte': request.GET.get('max_price'),
-        }
-
-        for filter_key, filter_value in filters.items():
-            if filter_value:
-                ads = ads.filter(**{filter_key: filter_value})
-
-        return render(request, 'ads/home.html', {'ads': ads[:20]})
+        ad_filter = AdFilter(request.GET, queryset=Ad.objects.all())
+        return render(request, 'ads/home.html', {'ads': ad_filter.qs[:20], 'filter': ad_filter})
 
 class AdDetailView(View):
     def get(self, request, ad_id):
