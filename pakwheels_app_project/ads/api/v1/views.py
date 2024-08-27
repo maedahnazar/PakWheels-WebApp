@@ -11,8 +11,8 @@ from cars.models import Image, Car
 
 @require_http_methods(["GET"])
 def ad_list_view(request):
-    ad_filter = AdFilter(request.GET, queryset=Ad.objects.all())
-    return render(request, 'ads/home.html', {'ads': ad_filter.qs[:20], 'filter': ad_filter})
+    ad_filter = AdFilter(request.GET, queryset=Ad.objects.filter(is_active=True))
+    return render(request, 'ads/home.html', {'ads': ad_filter.qs[:1000], 'filter': ad_filter})
 
 @require_http_methods(["GET"])
 def ad_detail_view(request, ad_id):
@@ -66,3 +66,75 @@ def car_create_view(request):
         })
 
     return response
+
+@login_required
+def user_cars_view(request):
+    return render(request, 'ads/user_cars.html', {'ads': Ad.objects.filter(user=request.user, is_active=True)})
+
+@login_required
+def car_edit_view(request, ad_id):
+    ad = get_object_or_404(Ad, id=ad_id, user=request.user, is_active=True)
+    car = get_object_or_404(Car, ad=ad, is_active=True)
+
+    if request.method == 'POST':
+        ad_form = AdForm(request.POST, instance=ad)
+        car_form = CarForm(request.POST, instance=car)
+        image_form = ImageForm(request.POST, request.FILES)
+
+        if car.inspection_reports.exists():
+            inspection_report_form = InspectionReportForm(request.POST, instance=car.inspection_reports.first())
+        else:
+            inspection_report_form = InspectionReportForm(request.POST)
+
+        if all([ad_form.is_valid(), car_form.is_valid(), inspection_report_form.is_valid()]):
+            ad = ad_form.save()
+            car = car_form.save()
+            
+            if image_form.is_valid():
+                car_edit_view_instance = car
+                car_edit_view_instance.save_related_entities(car_form, image_form, inspection_report_form)
+
+            messages.success(request, 'Car details updated successfully.')
+
+            response =  redirect('user_cars')
+
+    else:
+        ad_form = AdForm(instance=ad)
+        car_form = CarForm(instance=car)
+        image_form = ImageForm()
+
+        if car.inspection_reports.exists():
+            inspection_report_form = InspectionReportForm(instance=car.inspection_reports.first())
+        else:
+            inspection_report_form = InspectionReportForm()
+
+    response =  render(request, 'ads/edit_car.html', {
+                    'ad_form': ad_form,
+                    'car_form': car_form,
+                    'image_form': image_form,
+                    'inspection_report_form': inspection_report_form,
+                    'form_instance': ad,
+                    'existing_images': car.images.all(),
+                })
+    
+    return response
+
+@login_required
+def remove_car_image_view(request, image_id):
+    image = get_object_or_404(Image, id=image_id)
+
+    if image.car.ad.user == request.user:
+        image.delete()
+        messages.success(request, 'Image removed successfully.')
+    else:
+        messages.error(request, 'You are not authorized to remove this image.')
+
+    return redirect('car_edit', ad_id=image.car.ad.id)
+
+@login_required
+def car_delete_view(request, ad_id):
+    ad = get_object_or_404(Ad, id=ad_id, user=request.user)
+    ad.is_active = False
+    ad.save()
+    messages.success(request, 'Car deleted successfully.')
+    return redirect('user_cars')

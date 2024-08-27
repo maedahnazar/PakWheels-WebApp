@@ -10,6 +10,7 @@ class Ad(TimestampMixin, models.Model):
     price = models.FloatField()
     location = models.TextField()
     seller_comments = models.TextField()
+    is_active = models.BooleanField(default=True) 
 
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='ads')
 
