@@ -12,7 +12,7 @@ from cars.models import Image, Car
 class AdListView(View):
     def get(self, request):
         ad_filter = AdFilter(request.GET, queryset=Ad.objects.all())
-        
+
         #ToDO: Remove the slicing and implement pagination
         return render(request, 'ads/home.html', {'ads': ad_filter.qs[:1000], 'filter': ad_filter})
 
@@ -149,9 +149,16 @@ class AdRetrieveUpdateView(LoginRequiredMixin, View):
 class AdDeleteView(LoginRequiredMixin, View):
     def get(self, request, ad_id):
         ad = get_object_or_404(Ad, id=ad_id, user=request.user)
+    
         ad.is_active = False
         ad.save()
+        
+        car = ad.car
+        car.is_active = False
+        car.save()
+        
+        car.images.update(is_active=False)
+        car.inspection_reports.update(is_active=False)
 
-        messages.success(request, 'Car deleted successfully.')
-
-        return redirect('user-cars-list')
+        messages.success(request, 'Car and related details deleted successfully.')
+        return redirect('user_cars_list')
