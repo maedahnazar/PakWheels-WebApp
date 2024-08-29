@@ -1,0 +1,64 @@
+{% extends "core/base.html" %} 
+{% load static %} 
+{% block content %}
+<h1>Update Car Details</h1>
+    <form id="ad-form" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ ad_form.as_p }}
+    {{ car_form.as_p }}
+    {{ image_form.as_p }}
+    {{ inspection_report_form.as_p }}
+    <button type="submit">Update Car Details</button>
+    </form>
+
+<h2>Previous Images</h2>
+<ul>
+    {% for image in active_images %}
+    <li>
+        {% if image.external_image_url %}
+        <img src="{{ image.external_image_url }}" alt="Car Image" style="max-width: 150px"/>
+        {% elif image.uploaded_image %}
+        <img src="{{ image.uploaded_image.url }}" alt="Car Image" style="max-width: 150px"/>
+        {% endif %}
+        <button
+        type="button"
+        class="remove-image-btn"
+        data-image-id="{{ image.id }}"
+        >
+        Remove
+        </button>
+    </li>
+    {% endfor %}
+</ul>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const removeImageButtons = document.querySelectorAll(".remove-image-btn");
+        removeImageButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+            const imageId = this.getAttribute("data-image-id");
+            if (confirm("Are you sure you want to remove this image?")) {
+            fetch("{% url 'ad_update' ad_id=ad.id %}", {
+                method: "POST",
+                headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                'remove_image_id': imageId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                if (data.status === "success") {
+                    this.closest("li").remove();
+                } else {
+                    alert("Failed to remove the image. Please try again.");
+                }
+                });
+            }
+        });
+        });
+    });
+</script>
+{% endblock %}

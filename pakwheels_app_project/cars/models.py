@@ -8,7 +8,6 @@ class Car(TimestampMixin):
     assembly = models.TextField()
     engine_capacity = models.IntegerField()
     body_type = models.TextField()
-    is_active = models.BooleanField(default=True) 
 
     ad = models.OneToOneField('ads.Ad', on_delete=models.CASCADE, related_name='car')
 
@@ -20,23 +19,22 @@ class Car(TimestampMixin):
         if features:
             self.features.set(features)
 
-        if image_form.is_valid():
-            uploaded_images = image_form.cleaned_data.get('uploaded_images')
-            if uploaded_images or not self.images.exists():
-                images_to_create = [
-                    Image(car=self, uploaded_image=image)
-                    for image in uploaded_images
-                ]
-                Image.objects.bulk_create(images_to_create)
+        uploaded_images = image_form.cleaned_data.get('uploaded_images')
+        if uploaded_images:
+            images_to_create = [
+                Image(car=self, uploaded_image=image)
+                for image in uploaded_images
+            ]
+            Image.objects.bulk_create(images_to_create)
 
         inspection_report = inspection_report_form.save(commit=False)
         if inspection_report:
             inspection_report.car = self
             inspection_report.save()
 
-
 class Feature(TimestampMixin):
     name = models.TextField()
+    is_active = models.BooleanField(default=True)
 
     cars = models.ManyToManyField('cars.Car', related_name='features', through='CarFeatureThrough')
 

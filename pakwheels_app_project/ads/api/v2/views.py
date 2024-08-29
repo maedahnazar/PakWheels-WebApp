@@ -12,14 +12,28 @@ from cars.models import Image, Car
 class AdListView(View):
     def get(self, request):
         ad_filter = AdFilter(request.GET, queryset=Ad.objects.all())
-        return render(request, 'ads/home.html', {'ads': ad_filter.qs[:20], 'filter': ad_filter})
+        
+        #ToDO: Remove the slicing and implement pagination
+        return render(request, 'ads/home.html', {'ads': ad_filter.qs[:1000], 'filter': ad_filter})
+
 
 class AdDetailView(View):
     def get(self, request, ad_id):
-        ad = get_object_or_404(Ad, id=ad_id)
-        return render(request, 'ads/ad_detail.html', {'ad': ad, 'car': getattr(ad, 'car', None)})
+        ad = get_object_or_404(Ad, id=ad_id, is_active=True)
+        car = getattr(ad, 'car', None)
 
-class CarCreateView(LoginRequiredMixin, View):
+        return render(
+                    request, 
+                    'ads/ad_detail.html', {
+                        'ad': ad,
+                        'car': car,
+                        'images_exist': car.images.filter(is_active=True).exists(),
+                        'images': car.images.filter(is_active=True),
+                    }
+                )
+    
+
+class AdRetrieveCreateView(LoginRequiredMixin, View):
     def get(self, request):
         ad_form = AdForm()
         car_form = CarForm()
@@ -66,33 +80,41 @@ class CarCreateView(LoginRequiredMixin, View):
 
         return response
 
-class UserCarsView(LoginRequiredMixin, View):
+
+class UserCarsListView(LoginRequiredMixin, View):
     def get(self, request):
         ads = Ad.objects.filter(user=request.user, is_active=True)
         return render(request, 'ads/user_cars.html', {'ads': ads})
 
-class CarEditView(LoginRequiredMixin, View):
+
+class AdRetrieveUpdateView(LoginRequiredMixin, View):
     def get(self, request, ad_id):
         ad = get_object_or_404(Ad, id=ad_id, user=request.user, is_active=True)
         car = get_object_or_404(Car, ad=ad, is_active=True)
-
+        
         ad_form = AdForm(instance=ad)
         car_form = CarForm(instance=car)
         image_form = ImageForm()
         inspection_report_form = InspectionReportForm(instance=car.inspection_reports.first() if car.inspection_reports.exists() else None)
 
-        return render(request, 'ads/edit_car.html', {
+        response =  render(request, 'ads/ad_update.html', {
             'ad_form': ad_form,
             'car_form': car_form,
             'image_form': image_form,
             'inspection_report_form': inspection_report_form,
-            'form_instance': ad,
-            'existing_images': car.images.all(),
+            'ad': ad,
+            'active_images': car.images.filter(is_active=True),
         })
 
     def post(self, request, ad_id):
         ad = get_object_or_404(Ad, id=ad_id, user=request.user, is_active=True)
         car = get_object_or_404(Car, ad=ad, is_active=True)
+        
+        if 'remove_image_id' in request.POST:
+            image_id = request.POST.get('remove_image_id')
+            image = get_object_or_404(Image, id=image_id, car=car)
+            image.is_active = False
+            image.save()
 
         ad_form = AdForm(request.POST, instance=ad)
         car_form = CarForm(request.POST, instance=car)
@@ -110,35 +132,26 @@ class CarEditView(LoginRequiredMixin, View):
             )
 
             messages.success(request, 'Car details updated successfully.')
-            response =  redirect('user-cars')
+            response =  redirect('user-cars-list')
 
-        response =  render(request, 'ads/edit_car.html', {
+        response =  render(request, 'ads/ad_update.html', {
             'ad_form': ad_form,
             'car_form': car_form,
             'image_form': image_form,
             'inspection_report_form': inspection_report_form,
-            'form_instance': ad,
-            'existing_images': car.images.all(),
+            'ad': ad,
+            'active_images': car.images.filter(is_active=True),
         })
 
         return response
 
-class RemoveCarImageView(LoginRequiredMixin, View):
-    def get(self, request, image_id):
-        image = get_object_or_404(Image, id=image_id)
 
-        if image.car.ad.user == request.user:
-            image.delete()
-            messages.success(request, 'Image removed successfully.')
-        else:
-            messages.error(request, 'You are not authorized to remove this image.')
-
-        return redirect('car-edit', ad_id=image.car.ad.id)
-
-class CarDeleteView(LoginRequiredMixin, View):
+class AdDeleteView(LoginRequiredMixin, View):
     def get(self, request, ad_id):
         ad = get_object_or_404(Ad, id=ad_id, user=request.user)
         ad.is_active = False
         ad.save()
+
         messages.success(request, 'Car deleted successfully.')
-        return redirect('user-cars')
+
+        return redirect('user-cars-list')

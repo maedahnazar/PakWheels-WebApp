@@ -33,7 +33,7 @@ class PriceRangeFilter(admin.SimpleListFilter):
 
 @admin.register(Ad)
 class AdAdmin(admin.ModelAdmin):
-    list_display = ('title', 'price', 'location', 'car_id_display', 'created_at', 'modified_at')
+    list_display = ('title', 'price', 'location', 'car_id_display', 'created_at', 'modified_at', 'is_active')
     list_filter = (PriceRangeFilter, 'location')  
 
     def car_id_display(self, obj):
