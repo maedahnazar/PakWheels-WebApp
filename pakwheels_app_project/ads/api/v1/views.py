@@ -14,7 +14,7 @@ from cars.models import Image, Car
 def ad_list_view(request):
     ad_filter = AdFilter(request.GET, queryset=Ad.objects.filter(is_active=True))
 
-    #ToDO: Remove the slicing after implementing pagination
+    #ToDo: Remove the slicing after implementing pagination
     return render(request, 'ads/home.html', {'ads': ad_filter.qs[:1000], 'filter': ad_filter})
 
 @login_required
