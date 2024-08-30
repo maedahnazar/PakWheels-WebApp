@@ -14,7 +14,8 @@ class CarAdmin(admin.ModelAdmin):
         'body_type', 
         'ad_id_display', 
         'created_at', 
-        'modified_at'
+        'modified_at',
+        'is_active'
     )
     
     list_filter = ('registered_in', 'color', 'assembly', 'engine_capacity', 'body_type', 'ad', 'features')
@@ -26,7 +27,7 @@ class CarAdmin(admin.ModelAdmin):
 
 @admin.register(Feature)
 class FeatureAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'created_at', 'modified_at')
+    list_display = ('id', 'name', 'created_at', 'modified_at', 'is_active')
     list_filter = ('name',)
 
 @admin.register(InspectionReport)
@@ -44,7 +45,8 @@ class InspectionReportAdmin(admin.ModelAdmin):
         'car_id_display', 
         'source_id_display', 
         'created_at', 
-        'modified_at'
+        'modified_at',
+        'is_active'
     )
 
     list_filter = (
@@ -70,11 +72,11 @@ class InspectionReportAdmin(admin.ModelAdmin):
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'created_at', 'modified_at')
+    list_display = ('id', 'name', 'created_at', 'modified_at', 'is_active')
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'external_image_url', 'uploaded_image', 'car_id_display', 'created_at', 'modified_at')
+    list_display = ('id', 'external_image_url', 'uploaded_image', 'car_id_display', 'created_at', 'modified_at', 'is_active')
 
     def car_id_display(self, obj):
         return obj.car.id if obj.car else None

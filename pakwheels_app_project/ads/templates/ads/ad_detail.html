@@ -88,10 +88,10 @@
     <h1>{{ ad.title }}</h1>
     
     {% if ad.car %}
-        {% if ad.car.images.exists %}
+        {% if images_exist %}
             <div class="slider">
                 <div class="slides">
-                    {% for image in ad.car.images.all %}
+                    {% for image in images %}
                         <div class="slide">
                             {% if image.external_image_url %}
                                 <img src="{{ image.external_image_url }}" alt="{{ ad.title }}">

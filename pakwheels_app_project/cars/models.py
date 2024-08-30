@@ -14,26 +14,27 @@ class Car(TimestampMixin):
     def __str__(self):
         return f"{self.id} - {self.body_type} | {self.engine_capacity}cc"
 
-    def save_related_entities(self, car_form, image_form, inspection_report_form):        
+    def save_related_entities(self, car_form, image_form, inspection_report_form):
         features = car_form.cleaned_data.get('features')
         if features:
-            for feature in features:
-                self.features.add(feature)
+            self.features.set(features)
 
-        images_to_create = [
-            Image(car=self, uploaded_image=image)
-            for image in image_form.cleaned_data['uploaded_images']
-        ]
-        Image.objects.bulk_create(images_to_create)
+        uploaded_images = image_form.cleaned_data.get('uploaded_images')
+        if uploaded_images:
+            images_to_create = [
+                Image(car=self, uploaded_image=image)
+                for image in uploaded_images
+            ]
+            Image.objects.bulk_create(images_to_create)
 
         inspection_report = inspection_report_form.save(commit=False)
         if inspection_report:
             inspection_report.car = self
             inspection_report.save()
 
-
 class Feature(TimestampMixin):
     name = models.TextField()
+    is_active = models.BooleanField(default=True)
 
     cars = models.ManyToManyField('cars.Car', related_name='features', through='CarFeatureThrough')
 

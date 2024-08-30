@@ -1,0 +1,142 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Cars{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .ad-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .ad-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: calc(33.333% - 40px); /* Slightly larger width */
+        box-sizing: border-box;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column; /* Stack elements vertically */
+        justify-content: space-between;
+        transition: transform 0.2s ease-in-out;
+        height: auto; /* Allow height to adjust automatically */
+        position: relative; /* Required for absolute positioning of button container */
+        overflow: hidden; /* Ensure buttons do not overflow */
+    }
+
+    .ad-card:hover {
+        transform: scale(1.02);
+    }
+
+    .ad-card h2 {
+        font-size: 1.5em;
+        margin: 0;
+    }
+
+    .ad-card p {
+        font-size: 1em;
+        margin: 10px 0;
+    }
+
+    .ad-info {
+        flex: 1;
+    }
+
+    .ad-image {
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+        border-radius: 8px;
+        object-fit: cover;
+        margin-bottom: 10px;
+    }
+
+    .ad-actions {
+        margin-top: auto; /* Pushes the buttons to the bottom */
+        display: flex;
+        justify-content: space-between;
+        position: relative; /* Ensure buttons are positioned relative to the card */
+        z-index: 2; /* Ensure buttons are on top of the link */
+    }
+
+    .ad-actions a, .ad-actions form {
+        width: 48%; /* Each button takes half width */
+    }
+
+    .ad-card-link {
+        position: absolute; /* Position the link to cover the entire card */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1; /* Ensure link is below the buttons */
+        text-decoration: none; /* Remove default link styles */
+        color: inherit; /* Inherit text color from card */
+    }
+
+    @media (max-width: 768px) {
+        .ad-card {
+            width: calc(50% - 40px); /* Adjusted for smaller screens */
+        }
+    }
+
+    @media (max-width: 480px) {
+        .ad-card {
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .ad-image {
+            margin-top: 10px;
+        }
+
+        .ad-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .ad-actions a, .ad-actions form {
+            width: 100%; /* Full width on smaller screens */
+            margin-bottom: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>My Cars</h1>
+
+<div class="ad-cards">
+    {% for ad in ads %}
+        <div class="ad-card">
+            <a href="{% url 'ad_detail' ad.id %}" class="ad-card-link"></a>
+            <div class="ad-info">
+                <h2>{{ ad.title }}</h2>
+                <p>Price: {{ ad.price }} lacs</p>
+                <p>Location: {{ ad.location }}</p>
+            </div>
+            {% if ad.car.images.exists %}
+                {% if ad.car.images.first.external_image_url %}
+                    <img src="{{ ad.car.images.first.external_image_url }}" alt="{{ ad.title }}" class="ad-image">
+                {% elif ad.car.images.first.uploaded_image %}
+                    <img src="{{ ad.car.images.first.uploaded_image.url }}" alt="{{ ad.title }}" class="ad-image">
+                {% endif %}
+            {% endif %}
+            <div class="ad-actions">
+                <a href="{% url 'ad_update' ad.id %}">Edit</a>
+                <form method="post" action="{% url 'ad_delete' ad.id %}" onsubmit="return confirm('Are you sure you want to delete this car?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

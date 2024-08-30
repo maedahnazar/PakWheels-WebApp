@@ -17,6 +17,10 @@
             color: #fff;
             padding: 10px 0;
             text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         header a {
@@ -52,7 +56,8 @@
     <header>
         <a href="{% url 'ad_list' %}">Home</a>
         {% if user.is_authenticated %}
-            <a href="{% url 'add_car' %}">Sell Your Car</a>
+            <a href="{% url 'create_ad' %}">Sell Your Car</a>
+            <a href="{% url 'user_cars_list' %}">View My Cars</a>
             <form method="POST" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit" style="background:none; border:none; color:#fff; cursor:pointer; margin-left:10px;">Logout</button>

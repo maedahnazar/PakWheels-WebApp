@@ -12,7 +12,7 @@ class AdForm(forms.ModelForm):
 class CarForm(forms.ModelForm):
     class Meta:
         model = Car
-        fields = ['registered_in', 'color', 'assembly', 'engine_capacity', 'body_type']
+        fields = ['registered_in', 'color', 'assembly', 'engine_capacity', 'body_type', 'features']
 
     features = forms.ModelMultipleChoiceField(
         queryset=Feature.objects.all(),
@@ -20,12 +20,20 @@ class CarForm(forms.ModelForm):
         required=False
     )
 
+    def __init__(self, *args, **kwargs):
+        car_instance = kwargs.get('instance')
+        super().__init__(*args, **kwargs)
+        
+        if car_instance:
+            self.fields['features'].initial = car_instance.features.all()
+
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
 class MultipleFileField(forms.FileField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("widget", MultipleFileInput())
+        kwargs.setdefault("required", False)
         super().__init__(*args, **kwargs)
 
     def clean(self, uploaded_files, initial=None):
