@@ -20,8 +20,7 @@ def login_view(request):
                 'username': user.username,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-            },
-            status=status.HTTP_200_OK)
+            }, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -37,6 +36,7 @@ def signup_view(request):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }, status=status.HTTP_201_CREATED)
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
