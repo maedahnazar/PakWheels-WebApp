@@ -45,7 +45,7 @@ class CarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Car
-        fields = ['registered_in', 'color', 'assembly', 'engine_capacity', 'body_type', 'images']
+        fields = ['registered_in', 'color', 'assembly', 'engine_capacity', 'body_type', 'images', 'features']
 
     def create(self, validated_fields):
         features_ids = validated_fields.pop('features', [])
@@ -101,24 +101,24 @@ class AdCreateUpdateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_fields):
-        car_data = validated_fields.pop('car', None)
+        car_details = validated_fields.pop('car', None)
 
         ad = Ad.objects.create(**validated_fields)
 
-        if car_data:
-            car_serializer = CarSerializer(data=car_data)
+        if car_details:
+            car_serializer = CarSerializer(data=car_details)
             car_serializer.is_valid(raise_exception=True)
             car_serializer.save(ad=ad)
 
         return ad
 
     def update(self, instance, validated_fields):
-        car_data = validated_fields.pop('car', None)
+        car_details = validated_fields.pop('car', None)
 
         ad = super().update(instance, validated_fields)
 
-        if car_data:
-            car_serializer = CarSerializer(instance=ad.car, data=car_data)
+        if car_details:
+            car_serializer = CarSerializer(instance=ad.car, data=car_details)
             car_serializer.is_valid(raise_exception=True)
             car_serializer.save()
 
