@@ -109,24 +109,24 @@ class AdCreateUpdateSerializer(serializers.Serializer):
     car = CarSerializer()
 
     def create(self, validated_data):
-        car_data = validated_data.pop('car', None)
+        car_details = validated_data.pop('car', None)
 
         ad = Ad.objects.create(**validated_data)
 
-        if car_data:
-            car_serializer = CarSerializer(data=car_data)
+        if car_details:
+            car_serializer = CarSerializer(data=car_details)
             car_serializer.is_valid(raise_exception=True)
             car_serializer.save(ad=ad)
 
         return ad
 
     def update(self, instance, validated_data):
-        car_data = validated_data.pop('car', None)
+        car_details = validated_data.pop('car', None)
 
         ad = super().update(instance, validated_data)
 
-        if car_data:
-            car_serializer = CarSerializer(instance=ad.car, data=car_data)
+        if car_details:
+            car_serializer = CarSerializer(instance=ad.car, data=car_details)
             car_serializer.is_valid(raise_exception=True)
             car_serializer.save()
 
