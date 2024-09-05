@@ -1,7 +1,9 @@
 from django.urls import path
+
 from ads.api.v4.views import (
     AdListView, AdDetailView, AdCreateView, AdUpdateView, AdDeleteView, UserCarsListView
 )
+
 
 urlpatterns = [
     path('ads/', AdListView.as_view(), name='ad-list'),

@@ -75,16 +75,13 @@ class CarSerializer(serializers.Serializer):
         for feature_id in features_ids:
             CarFeatureThrough.objects.create(car=instance, feature_id=feature_id)
 
-        current_images = {image.uploaded_image.name: image for image in instance.images.all()}
-        updated_image_names = {image_file.name for image_file in images_files}
-
-        for image_name, existing_image in current_images.items():
-            if image_name not in updated_image_names:
+        for existing_image in list(instance.images.all()):
+            if existing_image.uploaded_image not in images_files:
                 existing_image.is_active = False
-                existing_image.save(update_fields=['is_active'])
+                existing_image.save()
 
         for image_file in images_files:
-            if image_file.name not in current_images:
+            if not instance.images.filter(uploaded_image=image_file).exists():
                 Image.objects.create(car=instance, uploaded_image=image_file)
 
         return instance
