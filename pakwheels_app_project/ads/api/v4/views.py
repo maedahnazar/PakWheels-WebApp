@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from ads.models import Ad
 from ads.api.v3.serializers import AdSerializer, AdCreateUpdateSerializer
 
+
 class AdListView(ListAPIView):
     queryset = Ad.objects.filter(is_active=True)
     serializer_class = AdSerializer
@@ -42,6 +43,7 @@ class AdCreateView(APIView):
                         "user": request.data.get("user"),
                         "car": car_details
                     })
+
         return Response(
             serializer.data if serializer.is_valid() and serializer.save(user=request.user) else serializer.errors,
             status=status.HTTP_201_CREATED if serializer.is_valid() else status.HTTP_400_BAD_REQUEST
@@ -69,6 +71,7 @@ class AdUpdateView(APIView):
                         },
                         partial=True
                     )
+
         return Response(
             serializer.data if serializer.is_valid() and serializer.save() else serializer.errors,
             status=status.HTTP_201_CREATED if serializer.is_valid() else status.HTTP_400_BAD_REQUEST

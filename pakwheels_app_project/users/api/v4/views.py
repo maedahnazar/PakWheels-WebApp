@@ -11,7 +11,7 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserLoginSerializer(data=request.data)
 
-        response_data = {
+        response_details = {
             'user_id': user.id,
             'username': user.username,
             'refresh': str(refresh),
@@ -21,7 +21,7 @@ class LoginView(APIView):
               (refresh := RefreshToken.for_user(user))) else serializer.errors
 
         return Response(
-            response_data,
+            response_details,
             status=status.HTTP_200_OK if serializer.is_valid() else status.HTTP_400_BAD_REQUEST
         )
 
@@ -30,7 +30,7 @@ class SignupView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserSignupSerializer(data=request.data)
 
-        response_data = {
+        response_details = {
             'user_id': user.id,
             'username': user.username,
             'refresh': str(refresh),
@@ -40,6 +40,6 @@ class SignupView(APIView):
               (refresh := RefreshToken.for_user(user))) else serializer.errors
 
         return Response(
-            response_data,
+            response_details,
             status=status.HTTP_201_CREATED if serializer.is_valid() else status.HTTP_400_BAD_REQUEST
         )

@@ -11,7 +11,7 @@ from users.api.v3.serializers import UserLoginSerializer, UserSignupSerializer
 def login_view(request):
     serializer = UserLoginSerializer(data=request.data)
 
-    response_data = {
+    response_details = {
         'user_id': user.id,
         'username': user.username,
         'refresh': str(refresh),
@@ -21,7 +21,7 @@ def login_view(request):
           (refresh := RefreshToken.for_user(user))) else serializer.errors
 
     return Response(
-        response_data,
+        response_details,
         status=status.HTTP_200_OK if serializer.is_valid() else status.HTTP_400_BAD_REQUEST
     )
 
@@ -29,7 +29,7 @@ def login_view(request):
 def signup_view(request):
     serializer = UserSignupSerializer(data=request.data)
 
-    response_data = {
+    response_details = {
         'user_id': user.id,
         'username': user.username,
         'refresh': str(refresh),
@@ -39,6 +39,6 @@ def signup_view(request):
           (refresh := RefreshToken.for_user(user))) else serializer.errors
 
     return Response(
-          response_data,
+          response_details,
           status=status.HTTP_201_CREATED if serializer.is_valid() else status.HTTP_400_BAD_REQUEST
        )
