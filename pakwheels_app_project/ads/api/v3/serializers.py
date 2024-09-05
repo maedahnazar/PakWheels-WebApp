@@ -47,11 +47,11 @@ class CarSerializer(serializers.ModelSerializer):
         model = Car
         fields = ['registered_in', 'color', 'assembly', 'engine_capacity', 'body_type', 'images']
 
-    def create(self, validated_data):
-        features_ids = validated_data.pop('features', [])
-        images_files = validated_data.pop('images', [])
+    def create(self, validated_fields):
+        features_ids = validated_fields.pop('features', [])
+        images_files = validated_fields.pop('images', [])
 
-        car = Car.objects.create(**validated_data)
+        car = Car.objects.create(**validated_fields)
 
         for feature_id in features_ids:
             CarFeatureThrough.objects.create(car=car, feature_id=feature_id)
@@ -61,11 +61,11 @@ class CarSerializer(serializers.ModelSerializer):
 
         return car
 
-    def update(self, instance, validated_data):
-        features_ids = validated_data.pop('features', [])
-        images_files = validated_data.pop('images', [])
+    def update(self, instance, validated_fields):
+        features_ids = validated_fields.pop('features', [])
+        images_files = validated_fields.pop('images', [])
 
-        for attr, value in validated_data.items():
+        for attr, value in validated_fields.items():
             setattr(instance, attr, value)
         instance.save()
 
@@ -100,10 +100,10 @@ class AdCreateUpdateSerializer(serializers.ModelSerializer):
         model = Ad
         fields = "__all__"
 
-    def create(self, validated_data):
-        car_data = validated_data.pop('car', None)
+    def create(self, validated_fields):
+        car_data = validated_fields.pop('car', None)
 
-        ad = Ad.objects.create(**validated_data)
+        ad = Ad.objects.create(**validated_fields)
 
         if car_data:
             car_serializer = CarSerializer(data=car_data)
@@ -112,10 +112,10 @@ class AdCreateUpdateSerializer(serializers.ModelSerializer):
 
         return ad
 
-    def update(self, instance, validated_data):
-        car_data = validated_data.pop('car', None)
+    def update(self, instance, validated_fields):
+        car_data = validated_fields.pop('car', None)
 
-        ad = super().update(instance, validated_data)
+        ad = super().update(instance, validated_fields)
 
         if car_data:
             car_serializer = CarSerializer(instance=ad.car, data=car_data)

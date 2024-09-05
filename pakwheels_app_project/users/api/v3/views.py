@@ -17,7 +17,7 @@ def login_view(request):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     } if (serializer.is_valid() and
-          (user := serializer.validated_data) and
+          (user := serializer.validated_fields) and
           (refresh := RefreshToken.for_user(user))) else serializer.errors
 
     return Response(

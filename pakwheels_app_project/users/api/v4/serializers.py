@@ -20,8 +20,8 @@ class UserSignupSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
-    def create(self, validated_data):
+    def create(self, validated_fields):
         return User.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password']
+            username=validated_fields['username'],
+            password=validated_fields['password']
         )
