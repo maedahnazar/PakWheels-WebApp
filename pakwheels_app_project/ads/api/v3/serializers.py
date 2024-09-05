@@ -45,7 +45,7 @@ class CarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Car
-        fields = ['registered_in', 'color', 'assembly', 'engine_capacity', 'body_type', 'features', 'images']
+        fields = ['registered_in', 'color', 'assembly', 'engine_capacity', 'body_type', 'images']
 
     def create(self, validated_data):
         features_ids = validated_data.pop('features', [])

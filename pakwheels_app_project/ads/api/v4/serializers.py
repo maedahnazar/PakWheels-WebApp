@@ -90,7 +90,7 @@ class CarSerializer(serializers.Serializer):
 class AdSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     title = serializers.TextField()
-    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    price = serializers.FloatField()
     location = serializers.TextField()
     is_active = serializers.BooleanField()
 
