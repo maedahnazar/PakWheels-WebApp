@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 
 from ads.models import Ad
@@ -13,74 +14,76 @@ from ads.api.v3.serializers import AdSerializer, AdCreateUpdateSerializer, CarSe
 
 @api_view(['GET'])
 def ad_list_view(request):
-    ads = Ad.objects.filter(is_active=True)[:10]  
-    serializer = AdSerializer(ads, many=True)
-    return Response(serializer.data)
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+
+    return paginator.get_paginated_response(
+        AdSerializer(paginator.paginate_queryset(Ad.objects.filter(is_active=True), request), many=True).data
+    )
 
 @api_view(['GET'])
 def ad_detail_view(request, ad_id):
-    ad = get_object_or_404(Ad, id=ad_id, is_active=True)
-    serializer = AdSerializer(ad)
-    return Response(serializer.data)
+    return Response(AdSerializer(get_object_or_404(Ad, id=ad_id, is_active=True)).data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def ad_create_view(request):
-    car_data = request.data.get('car', {})
-    car_data = json.loads(car_data) if isinstance(car_data, str) else car_data
+    car_details = request.data.get('car', {})
+    car_details = json.loads(car_details) if isinstance(car_details, str) else car_details
 
-    images = request.FILES.getlist('car[images]')
-    car_data['images'] = images
+    car_details['images'] = request.FILES.getlist('car[images]')
 
-    ad_data = {
-        "title": request.data.get("title"),
-        "price": request.data.get("price"),
-        "location": request.data.get("location"),
-        "seller_comments": request.data.get("seller_comments"),
-        "user": request.data.get("user"),
-        "car": car_data
-    }
+    serializer = AdCreateUpdateSerializer(
+        data={
+            "title": request.data.get("title"),
+            "price": request.data.get("price"),
+            "location": request.data.get("location"),
+            "seller_comments": request.data.get("seller_comments"),
+            "user": request.data.get("user"),
+            "car": car_details
+        })
 
-    serializer = AdCreateUpdateSerializer(data=ad_data)
-    if serializer.is_valid():
-        serializer.save(user=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(
+        serializer.data if serializer.is_valid() and serializer.save(user=request.user) else serializer.errors,
+        status=status.HTTP_201_CREATED if serializer.is_valid() else status.HTTP_400_BAD_REQUEST
+    )
 
 @api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def ad_update_view(request, ad_id):
-    ad = get_object_or_404(Ad, id=ad_id, user=request.user, is_active=True)
-    car_data = request.data.get('car', {})
-    car_data = json.loads(car_data) if isinstance(car_data, str) else car_data
+    car_details = request.data.get('car', {})
+    car_details = json.loads(car_details) if isinstance(car_details, str) else car_details
 
-    images = request.FILES.getlist('car[images]')
-    car_data.setdefault('images', []).extend(images)
+    car_details.setdefault('images', []).extend(request.FILES.getlist('car[images]'))
 
-    ad_data = {
-        "title": request.data.get("title"),
-        "price": request.data.get("price"),
-        "location": request.data.get("location"),
-        "seller_comments": request.data.get("seller_comments"),
-        "user": request.data.get("user"),
-        "car": car_data
-    }
+    serializer = AdCreateUpdateSerializer(
+        get_object_or_404(Ad, id=ad_id, user=request.user, is_active=True),
+        data={
+            "title": request.data.get("title"),
+            "price": request.data.get("price"),
+            "location": request.data.get("location"),
+            "seller_comments": request.data.get("seller_comments"),
+            "user": request.data.get("user"),
+            "car": car_details
+        },
+        partial=True
+    )
 
-    serializer = AdCreateUpdateSerializer(ad, data=ad_data, partial=True)
-
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(
+        serializer.data if serializer.is_valid() and serializer.save() else serializer.errors,
+        status=status.HTTP_201_CREATED if serializer.is_valid() else status.HTTP_400_BAD_REQUEST
+    )
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def ad_delete_view(request, ad_id):
     ad = get_object_or_404(Ad, id=ad_id, user=request.user)
     ad.is_active = False
-    ad.save()
+    ad.save(update_fields=['is_active'])
 
     car = ad.car
     car.is_active = False
-    car.save()
+    car.save(update_fields=['is_active'])
 
     car.images.update(is_active=False)
     car.inspection_reports.update(is_active=False)
@@ -90,6 +93,4 @@ def ad_delete_view(request, ad_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_cars_list_view(request):
-    ads = Ad.objects.filter(user=request.user, is_active=True)
-    serializer = AdSerializer(ads, many=True)
-    return Response(serializer.data)
+    return Response(AdSerializer(Ad.objects.filter(user=request.user, is_active=True), many=True).data)

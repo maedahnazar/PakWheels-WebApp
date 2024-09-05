@@ -47,16 +47,29 @@ class CarSerializer(serializers.ModelSerializer):
         model = Car
         fields = ['registered_in', 'color', 'assembly', 'engine_capacity', 'body_type', 'features', 'images']
 
+    def create(self, validated_data):
+        features_ids = validated_data.pop('features', [])
+        images_files = validated_data.pop('images', [])
+
+        car = Car.objects.create(**validated_data)
+
+        for feature_id in features_ids:
+            CarFeatureThrough.objects.create(car=car, feature_id=feature_id)
+
+        for image_file in images_files:
+            Image.objects.create(car=car, uploaded_image=image_file)
+
+        return car
+
     def update(self, instance, validated_data):
         features_ids = validated_data.pop('features', [])
         images_files = validated_data.pop('images', [])
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
         instance.save()
-        instance.features.clear()
 
+        instance.features.clear()
         for feature_id in features_ids:
             CarFeatureThrough.objects.create(car=instance, feature_id=feature_id)
 
@@ -88,20 +101,24 @@ class AdCreateUpdateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
+        car_data = validated_data.pop('car', None)
+
         ad = Ad.objects.create(**validated_data)
 
-        car_serializer = CarSerializer(data=validated_data.pop('car', None))
-        car_serializer.is_valid(raise_exception=True)
-        car_serializer.save(ad=ad)
+        if car_data:
+            car_serializer = CarSerializer(data=car_data)
+            car_serializer.is_valid(raise_exception=True)
+            car_serializer.save(ad=ad)
 
         return ad
 
     def update(self, instance, validated_data):
         car_data = validated_data.pop('car', None)
+
         ad = super().update(instance, validated_data)
 
         if car_data:
-            car_serializer = CarSerializer(instance.car, data=car_data, partial=True)
+            car_serializer = CarSerializer(instance=ad.car, data=car_data)
             car_serializer.is_valid(raise_exception=True)
             car_serializer.save()
 
